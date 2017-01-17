@@ -1,0 +1,216 @@
+---
+title: " UW 350: HW1"
+author: "Anish Mohan"
+date: "January 15, 2017"
+output: html_document
+---
+##1. Summary and/or Key Conclusions
+
+  + Overall Height of the building has a significant impact on the Heating and Cooling load. Heating/Cooling load is lower when the Overall Height is smaller than 4 units. As the Overall Height increases above 7 units the average Heating/Cooling Load increases significantly.
+  
+  +  Roof Area of the building impacts the Heating and the Cooling Load. Heating/Cooling load seems to be higher when the Roof Areas is below 150 Units. When the Roof Area is above 200 units, the average Heating load is lower
+  
+  +  Surface Area of the building impacts the Heating and Cooling Load. Heating/Cooling loads seems to be higher when the Surface Area is smaller than 675 units. As the Surface Area increases beyond 675 Units, the Average Heating/Cooling load is lower.
+  
+  + Even though the correlation between Heating/Cooling load and Glazing area is small; it was noted that as value of Glazing Area increases the Heating/Cooling load increases.
+  
+  +  Heating and Cooling Load distribution has the same distribution for all Orientations.
+
+##2. Reviewing Data
+
+  Source Data:-
+  A. Tsanas, A. Xifara: 'Accurate quantitative estimation of energy performance of residential buildings using statistical machine learning tools', Energy and Buildings, Vol. 49, pp. 560-567, 2012
+
+
+```{r}
+  # Read the dataset
+  energy = read.csv("EnergyEfficiencyData.csv", header = TRUE, stringsAsFactors = FALSE)
+```
+
+
+```{r}
+  # Review the names of the columns or the features
+  names(energy)
+```
+
+
+```{r}
+  # Print a summary of the datatypes in the data.
+  str(energy)
+```
+
+  The data here shows that there are 768 rows (sample) and 10 columns (features).
+
+```{r}
+  # Quick check to see if there are any NA's in the data
+  summary(is.na(energy))
+```
+
+  Per this chart, none of the columns have any NAs.
+
+
+##3. Exploratory Data Analysis
+
+  As a next step, look at each of the feature columns and review the distribution of the data
+
+###Histogram of Cooling Load
+
+```{r}
+  hist(energy$Cooling.Load, main = paste("Histogram of Cooling Load"), xlab = "Cooling Load", ylab = "Counts")
+```
+
+The Cooling Load is varying from 10-50 units with a distribution that is unimodal and skewed towards lower values
+
+###Histogram of Heating Load
+```{r}
+  hist(energy$Heating.Load, main = paste("Histogram of Heating Load"), xlab = "Heating Load", ylab = "Counts")
+```
+
+The Heating load varies from 0 to 50 units as well. Maximum counts for heating load is in the range [10-15] units with 250+ counts.
+
+###Histogram of Relative Compactness
+```{r}
+  hist(energy$Relative.Compactness, main = paste("Histogram of Relative Compactness"), xlab = "Relative Compactness", ylab = "Counts")
+```
+
+  Relative Compactness measure varies from 0.6 units to 1.0 units. Number of counts in each bin of the Relative Compactness measure is fairly similar i.e Most of the bins have about 125 counts and 2 remainng bins have a count of 60
+  
+###Histogram of Surface Area
+```{r}
+  hist(energy$Surface.Area, main = paste("Histogram of Surface Area"), xlab = "Surface Area", ylab = "Counts")
+```
+
+  Surface Area measures from 500 to 820 Units. The counts for most of the bins are equal with each bin having about 70 entries
+
+###Histogram of Wall Area
+```{r}
+  hist(energy$Wall.Area, main = paste("Histogram of Wall Area"), xlab = "Wall Area", ylab = "Counts")
+```
+
+  Wall Area varies from ~230 units to 420 Units. It is a unimodal distribution with peak of about 150+ counts around 280-320 units of wall-area
+
+
+###Histogram of Roof Area
+```{r}
+  hist(energy$Roof.Area, main = paste("Histogram of Roof Area"), xlab = "Roof Area", ylab = "Counts")
+```
+
+  Roof Area has a skewed distribution with most of the houses having Roof Area above 220 Units. Some of the houses have roof area below 150 units, but there are no units with Roof Area between 150-220 units.
+
+###Histogram of Overeall Height
+```{r}
+  hist(energy$Overall.Height, main = paste("Histogram of Overall Height"), xlab = "Overall Height", ylab = "Counts")
+```
+
+  All the measurements of the Overall Height are either 3.5 units or 7.0 units. The distribution is equal for these measurements
+
+###Histogram of Orientation
+```{r}
+  hist(energy$Orientation, main = paste("Histogram of Orientation"), xlab = "Orientation", ylab = "Counts")
+```
+
+  Orientation takes only 4 values and the there seems to be equal distribution of those values of orientation.
+
+###Histogram of Glazing Area
+```{r}
+  hist(energy$Glazing.Area, main = paste("Histogram of Glazing Area"), xlab = "Glazing Area", ylab = "Counts")
+```
+
+  Glazing Area also has only 4 values. Three non-zero values (0.1,0.25 and 0.4) have equal distribution for the counts.
+
+###Histogram of Glazing Area Distribution
+```{r}
+  hist(energy$Glazing.Area.Distribution, main = paste("Histogram of Glazing Area Distribution"), xlab = "Glazing Area Distribution", ylab = "Counts")
+```
+
+  Glazing Area distribution takes 5 integer value (0 to 5). The distribution across non-zero values are equal.
+
+
+#4. Analysis of factors contributing to Heating and Cooling Load
+
+###Analyzing Correlation
+```{r}
+  # Analyzing Correlation:
+  cor(energy)
+```
+
+  + Some observations from the Correlation information:
+    + Heating/Cooling Load seems to have high coorrelation (>0.8) with Overall Height.
+    + Heating/Cooling Load seems to have some coorrelation (>0.5) with Relative Compactness.
+    + Heating/Cooling Load seems to have high anti-coorrelation (<-0.8) with Roof Area.
+    + Heating/Cooling Load seems to have some anti-coorrelation (<-0.5) with Surface Area.
+    + Orientation does not seem to be correlated to any other variables. Additionally, Heating/Cooling load seems to have identifical distribution in all Orientations.
+
+
+
+###Plot variables that impact Heating/Cooling load
+```{r}
+  require(ggplot2)
+  # Correlation between Heating/Cooling Load and Roof Area:
+  cor(energy$Heating.Load,energy$Roof.Area)
+  cor(energy$Cooling.Load,energy$Roof.Area)
+  
+  #Scatter plot of the Heating/Cooling Load and Roof Area
+  ggplot(energy, aes(y = Heating.Load, x = Roof.Area))+ geom_point() + xlab("Roof Area") + ylab("Heating Load") + ggtitle("Relationship between Heating Load and Roof Area")
+  ggplot(energy, aes(y = Cooling.Load, x = Roof.Area))+ geom_point() + xlab("Roof Area") + ylab("Cooling Load") + ggtitle("Relationship between Cooling Load and Roof Area")
+```
+
+  + Correlation between Heating Load and Roof Area is : -0.862. Hence there is strong anti-correlation between Roof Area and Heating Load.
+  + Correlation between Cooling Load and Roof Area is : -0.863. Hence there is strong anti-correlation between Roof Area and Cooling Load.
+  + The Scatter plot shows that Heating/Cooling load seems to be higher when the Roof Areas is below 150 Units. When the Roof Area is above 200 units the Heating/Cooling load is lower
+
+
+```{r}
+  # Correlation between Heating/Cooling Load and Overall Height:
+  cor(energy$Heating.Load,energy$Overall.Height)
+  cor(energy$Cooling.Load,energy$Overall.Height)
+  
+  #Scatter plot of the Heating/Cooling Load and Overall Height
+  ggplot(energy, aes(y = Heating.Load, x = Overall.Height))+ geom_point() + xlab("Overall Height") + ylab("Heating Load") + ggtitle("Relationship between Heating Load and Overall Height")
+  ggplot(energy, aes(y = Cooling.Load, x = Overall.Height))+ geom_point() + xlab("Overall Height") + ylab("Cooling Load") + ggtitle("Relationship between Cooling Load and Overall Height")
+```
+
+  + Correlation between Heating Load and Roof Area is : 0.889. Hence there is strong correlation between Overall Height and Heating Load.
+  + Correlation between Cooling Load and Roof Area is : 0.896. Hence there is strong correlation between Overall Height and Cooling Load.
+  + The Scatter plot shows that Heating/Cooling load is lower when the Overall Height is smaller than 4 units. As the Overall Height increases above 7 units the Heating Load increases.
+
+
+```{r}
+  # Correlation between Heating/Cooling Load and Surface Area:
+  cor(energy$Heating.Load,energy$Surface.Area)
+  cor(energy$Cooling.Load,energy$Surface.Area)
+  
+  #Scatter plot of the Heating/Cooling Load and Surface Area:
+  ggplot(energy, aes(y = Heating.Load, x = Surface.Area))+ geom_point() + xlab("Surface Area") + ylab("Heating Load") + ggtitle("Relationship between Heating Load and Surface Area")
+  ggplot(energy, aes(y = Cooling.Load, x = Surface.Area))+ geom_point() + xlab("Surface Area") + ylab("Cooling Load") + ggtitle("Relationship between Cooling Load and Surface Area")
+```
+
+  + Correlation between Heating Load and Roof Area is : -0.658. Hence there is strong anti-correlation between Surface Area and Heating Load.
+  + Correlation between Cooling Load and Roof Area is : -0.673. Hence there is strong anti-correlation between Surface Area and Cooling Load.
+  + The Scatter plot shows that Heating/Cooling loads seems to be higher when the Surface Area is smaller than 675 units. As the Surface Area increases beyond 675 Units, the Heating/Cooling load starts decreasing.
+
+```{r}
+  # Correlation between Heating/Cooling Load and Glazing Area:
+  cor(energy$Heating.Load,energy$Glazing.Area)
+  cor(energy$Cooling.Load,energy$Glazing.Area)
+  
+  #Scatter and Violin plot of the Heating/Cooling Load and Glazing Area
+  ggplot(energy, aes(y = Heating.Load, x = Glazing.Area))+ geom_point() + xlab("Glazing Area") + ylab("Heating Load") + ggtitle("Relationship between Heating Load and Glazing Area")
+  ggplot(energy, aes(x = factor(Glazing.Area), y = Heating.Load)) + geom_violin(trim = TRUE, draw_quantiles = c(0.25,0.5,0.75)) + xlab("Glazing Area") + ylab("Heating Load") + ggtitle(" Heating Load by Glazing Area")
+  ggplot(energy, aes(y = Cooling.Load, x = Glazing.Area))+ geom_point() + xlab("Glazing Area") + ylab("Cooling Load") + ggtitle("Relationship between Cooling Load and Glazing Area")
+  ggplot(energy, aes(x = factor(Glazing.Area), y = Cooling.Load)) + geom_violin(trim = TRUE, draw_quantiles = c(0.25,0.5,0.75)) + xlab("Glazing Area") + ylab("Cooling Load") + ggtitle(" Cooling Load by Glazing Area")
+```
+
+
+ + Correlation between Heating Load and Glazing Area is : 0.270. Correlation coefficient is low implying not a strong correlation between Glazing Area and Heating Load.
+ + Correlation between Cooling Load and Glazing Area is : 0.208. Correlation coefficient is low implying not a strong correlation between Glazing Area and Heating Load.
+ + However, the violin plot shows that the distribution of Heating/Cooling moves towards higher values as the Glazing area changes from 0 units to 0.4 units.
+
+
+```{r}
+  # Violin plot of the Heating/Cooling Load and Orientation
+  ggplot(energy, aes(x = factor(Orientation), y = Heating.Load)) + geom_violin(trim = TRUE, draw_quantiles = c(0.25,0.5,0.75)) + xlab("Orientation") + ylab("Heating Load") + ggtitle(" Heating Load by Orientation")
+  ggplot(energy, aes(x = factor(Orientation), y = Cooling.Load)) + geom_violin(trim = TRUE, draw_quantiles = c(0.25,0.5,0.75)) + xlab("Orientation") + ylab("Cooling Load") + ggtitle(" Cooling Load by Orientation")
+```
+ 
+ + The violin plot shows that the distribution of Heating/Cooling distribution is same for all Orientations.
