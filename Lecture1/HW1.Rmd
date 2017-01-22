@@ -1,8 +1,10 @@
 ---
-title: " UW 350: HW1"
+title: ' UW 350: HW1'
 author: "Anish Mohan"
 date: "January 15, 2017"
-output: html_document
+output:
+  pdf_document: default
+  html_document: default
 ---
 ##1. Summary and/or Key Conclusions
 
