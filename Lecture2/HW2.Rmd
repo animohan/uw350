@@ -1,0 +1,91 @@
+---
+title: "HW2"
+author: "Anish Mohan"
+date: "January 25, 2017"
+output: html_document
+---
+##1. Summary and/or Key Conclusions
+
+##2. Reviewing Data
+
+  Source Data:-
+  A. Tsanas, A. Xifara: 'Accurate quantitative estimation of energy performance of residential buildings using statistical machine learning tools', Energy and Buildings, Vol. 49, pp. 560-567, 2012
+
+
+```{r}
+library(ggplot2)
+  # Read the dataset
+  energy = read.csv("EnergyEfficiencyData.csv", header = TRUE, stringsAsFactors = FALSE)
+```
+
+
+```{r}
+  # Review the names of the columns or the features
+  names(energy)
+```
+
+
+```{r}
+  # Print a summary of the datatypes in the data.
+  str(energy)
+```
+
+  The data here shows that there are 768 rows (sample) and 10 columns (features).
+
+```{r}
+  # Quick check to see if there are any NA's in the data
+  summary(is.na(energy))
+```
+
+  Per this chart, none of the columns have any NAs.
+  
+###. Exploratory Data Analysis
+
+  1. Heating and Cooling Load as a function of Surface Area
+```{r}
+      #Scatter plot of the Heating/Cooling Load and Surface Area
+      ggplot(energy, aes(y = Heating.Load, x = Surface.Area))+ geom_point() + xlab("Surface Area") + ylab("Heating Load") + ggtitle("Relationship between Heating Load and Surface Area")
+      ggplot(energy, aes(y = Cooling.Load, x = Surface.Area))+ geom_point() + xlab("Surface Area") + ylab("Cooling Load") + ggtitle("Relationship between Cooling Load and Surface Area")
+      
+```
+
+      + This scatter plot shows that that Heating/Cooling load is higher when the Surface areas is <675 units. As the Surface area increases beyond 675 units, the heating and cooling load starts decreasing
+      
+      + Next we will analyze if Surface Area in conjunction with other parameters impacts heating and cooling load
+
+
+  2. Heating and Cooling Load as a function of Roof area along with impact of other variables
+  
+```{r}
+      #Scatter Plot of Heating and Cooling Load and Surface Area with Orientation as a factor
+      ggplot(energy, aes(y = Heating.Load, x = Surface.Area)) + geom_point(aes(color = as.factor(Roof.Area), alpha = 0.3)) + xlab("Surface Area") + ylab("Heating Load") + ggtitle("Impact of Surface Area and Roof.Area on Heating Load")
+      
+      ggplot(energy, aes(y = Cooling.Load, x = Surface.Area)) + geom_point(aes(color = as.factor(Roof.Area))) + xlab("Surface Area") + ylab("Cooling Load") + ggtitle("Impact of Surface Area and Roof.Area on Cooling Load")
+```
+
+    + In this plot it is shown that if Surface Area is larger than ~675 units, the Roof area is large. For such building, the Heating and the cooling load is lower than building that have small Surface area and Roof Area.
+    
+    
+```{r}
+      ggplot(energy, aes(y = Heating.Load, x = Surface.Area)) + geom_point(aes(color = as.factor(Relative.Compactness), alpha = 0.3)) + xlab("Surface Area") + ylab("Heating Load") + ggtitle("Impact of Surface Area and Relative Compactness on Heating Load ")
+      
+      ggplot(energy, aes(y = Cooling.Load, x = Surface.Area)) + geom_point(aes(color = as.factor(Relative.Compactness))) + xlab("Surface Area") + ylab("Cooling Load") + ggtitle("Impact of Surface Area and Relative Compactness on Cooling Load ")
+```
+
+  + In this plot is is shows that if Surface Area is larger than ~675 units, then the Relative Compactness is below 0.74 units and the heating and Cooling loads are lower.
+    
+    ```{r}
+      ggplot(energy, aes(y = Heating.Load, x = Surface.Area)) + geom_point(aes(color = as.factor(Overall.Height), alpha = 0.3)) + xlab("Surface Area") + ylab("Heating Load") + ggtitle("Impact of Surface Area and Overall Height on Heating Load ")
+      
+      ggplot(energy, aes(y = Cooling.Load, x = Surface.Area)) + geom_point(aes(color = as.factor(Overall.Height))) + xlab("Surface Area") + ylab("Cooling Load") + ggtitle("Impact of Surface Area and Overall Height on Cooling Load ")
+```
+
+    + In this plot is is shows that if Surface Area is larger than ~675 units, then the Overall Height is ~3.5units and the heating and Cooling loads are lower.
+
+    ```{r}
+      ggplot(energy, aes(y = Heating.Load, x = Surface.Area)) + geom_point(aes(color = as.factor(Orientation))) + xlab("Surface Area") + ylab("Heating Load") + ggtitle("Impact of Surface Area and Orientation on Heating Load ")
+      
+      ggplot(energy, aes(y = Cooling.Load, x = Surface.Area)) + geom_point(aes(color = as.factor(Orientation))) + xlab("Surface Area") + ylab("Cooling Load") + ggtitle("Impact of Surface Area and Orientation on Cooling Load ")
+```
+    
+    + This plot shows that there are no preferred orientation along with Surface Area such that it leads to lower heating or cooling load.  However, Direction = "2" is less common in lower Surface Area buildings where the Heating/Cooling load is larger 
