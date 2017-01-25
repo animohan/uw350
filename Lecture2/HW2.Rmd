@@ -39,53 +39,208 @@ library(ggplot2)
 
   Per this chart, none of the columns have any NAs.
   
-###. Exploratory Data Analysis
+###3. Exploratory Data Analysis
 
-  1. Heating and Cooling Load as a function of Surface Area
+####3.1 Heating and Cooling Load as a function of Surface Area
+  
 ```{r}
       #Scatter plot of the Heating/Cooling Load and Surface Area
       ggplot(energy, aes(y = Heating.Load, x = Surface.Area))+ geom_point() + xlab("Surface Area") + ylab("Heating Load") + ggtitle("Relationship between Heating Load and Surface Area")
       ggplot(energy, aes(y = Cooling.Load, x = Surface.Area))+ geom_point() + xlab("Surface Area") + ylab("Cooling Load") + ggtitle("Relationship between Cooling Load and Surface Area")
-      
 ```
-
-      + This scatter plot shows that that Heating/Cooling load is higher when the Surface areas is <675 units. As the Surface area increases beyond 675 units, the heating and cooling load starts decreasing
+    
++ This scatter plot shows that that Heating/Cooling load is higher when the Surface areas is <675 units. As the Surface area increases beyond 675 units, the heating and cooling load starts decreasing
++ Next we will analyze if Surface Area in conjunction with other parameters impacts heating and cooling load.   
       
-      + Next we will analyze if Surface Area in conjunction with other parameters impacts heating and cooling load
-
-
-  2. Heating and Cooling Load as a function of Roof area along with impact of other variables
   
+  
+  
+####3.2 Heating and Cooling Load as a function of Surface area segmented along Roof Area.
+    
 ```{r}
       #Scatter Plot of Heating and Cooling Load and Surface Area with Orientation as a factor
       ggplot(energy, aes(y = Heating.Load, x = Surface.Area)) + geom_point(aes(color = as.factor(Roof.Area), alpha = 0.3)) + xlab("Surface Area") + ylab("Heating Load") + ggtitle("Impact of Surface Area and Roof.Area on Heating Load")
       
       ggplot(energy, aes(y = Cooling.Load, x = Surface.Area)) + geom_point(aes(color = as.factor(Roof.Area))) + xlab("Surface Area") + ylab("Cooling Load") + ggtitle("Impact of Surface Area and Roof.Area on Cooling Load")
 ```
-
-    + In this plot it is shown that if Surface Area is larger than ~675 units, the Roof area is large. For such building, the Heating and the cooling load is lower than building that have small Surface area and Roof Area.
-    
-    
+  
+  
++ In this plot it is shown that if Surface Area is larger than ~675 units, the Roof area is large. For such building, the Heating and the cooling load is lower than building that have small Surface area and Roof Area.  
+      
+  
+  
+        
+####3.3 Heating and Cooling Load as a function of Surface area segmented along Relative Compactness.  
+  
 ```{r}
       ggplot(energy, aes(y = Heating.Load, x = Surface.Area)) + geom_point(aes(color = as.factor(Relative.Compactness), alpha = 0.3)) + xlab("Surface Area") + ylab("Heating Load") + ggtitle("Impact of Surface Area and Relative Compactness on Heating Load ")
       
       ggplot(energy, aes(y = Cooling.Load, x = Surface.Area)) + geom_point(aes(color = as.factor(Relative.Compactness))) + xlab("Surface Area") + ylab("Cooling Load") + ggtitle("Impact of Surface Area and Relative Compactness on Cooling Load ")
 ```
-
-  + In this plot is is shows that if Surface Area is larger than ~675 units, then the Relative Compactness is below 0.74 units and the heating and Cooling loads are lower.
-    
+   
+   
++ In this plot is is shows that if Surface Area is larger than ~675 units, then the Relative Compactness is below 0.74 units and the heating and Cooling loads are lower.  
+  
+  
+          
+####3.4 Heating and Cooling Load as a function of Surface area segmented along Overall Height.  
+  
+  
     ```{r}
       ggplot(energy, aes(y = Heating.Load, x = Surface.Area)) + geom_point(aes(color = as.factor(Overall.Height), alpha = 0.3)) + xlab("Surface Area") + ylab("Heating Load") + ggtitle("Impact of Surface Area and Overall Height on Heating Load ")
       
       ggplot(energy, aes(y = Cooling.Load, x = Surface.Area)) + geom_point(aes(color = as.factor(Overall.Height))) + xlab("Surface Area") + ylab("Cooling Load") + ggtitle("Impact of Surface Area and Overall Height on Cooling Load ")
 ```
-
-    + In this plot is is shows that if Surface Area is larger than ~675 units, then the Overall Height is ~3.5units and the heating and Cooling loads are lower.
-
-    ```{r}
+  
+  
++ In this plot is is shows that if Surface Area is larger than ~675 units, then the Overall Height is ~3.5units and the heating and Cooling loads are lower.
+  
+  
+  
+        
+####3.5 Heating and Cooling Load as a function of Surface area segmented along Orientation.
+  
+  
+```{r}
       ggplot(energy, aes(y = Heating.Load, x = Surface.Area)) + geom_point(aes(color = as.factor(Orientation))) + xlab("Surface Area") + ylab("Heating Load") + ggtitle("Impact of Surface Area and Orientation on Heating Load ")
       
       ggplot(energy, aes(y = Cooling.Load, x = Surface.Area)) + geom_point(aes(color = as.factor(Orientation))) + xlab("Surface Area") + ylab("Cooling Load") + ggtitle("Impact of Surface Area and Orientation on Cooling Load ")
 ```
+  
+  
++ This plot shows that there are no preferred orientation along with Surface Area such that it leads to lower heating or cooling load.  However, Direction = "2" is less common in lower Surface Area buildings where the Heating/Cooling load is larger 
+      
+      
+  
+        
+####3.6 Hexbin and Density plotting of Heating/Cooling Load and Relative Compactness
+  
+```{r}
+      ggplot(energy, aes(y = Heating.Load, x = Relative.Compactness )) + stat_binhex(bins = 10) + xlab("Relative Compactness") + ylab("Heating Load") + ggtitle("Density of points when comparing Heating Load and Relative Compactness")
+      ggplot(energy, aes(y = Cooling.Load, x = Relative.Compactness )) + stat_binhex(bins = 10) + xlab("Relative Compactness") + ylab("Cooling Load") + ggtitle("Density of points when comparing Heating Load and Relative Compactness")
+```
+      
++ This plot shows that for most houses it is common to have low heating load ~12 units when the Relative.Compactness is low 0.7 units
++ For Cooling load it seems to be extremely common to be on the on the lower end when the Relative Compactness is lower than 0.7 units
     
-    + This plot shows that there are no preferred orientation along with Surface Area such that it leads to lower heating or cooling load.  However, Direction = "2" is less common in lower Surface Area buildings where the Heating/Cooling load is larger 
+```{r}
+      ggplot(energy, aes(y = Heating.Load, x = Relative.Compactness )) + geom_point() + geom_density2d() + xlab("Relative Compactness") + ylab("Heating Load") + ggtitle("Density of points when comparing Heating Load and Relative Compactness")
+      ggplot(energy, aes(y = Cooling.Load, x = Relative.Compactness )) + geom_point() + geom_density2d() + xlab("Relative Compactness") + ylab("Cooling Load") + ggtitle("Density of points when comparing Heating Load and Relative Compactness")
+```
+    
++ The 2D density plot shows that there are around 3 areas of concentration. They key area of high density being around low Heating load for low Relative Compactness, similar to Hexbin plot.
++ Like the Heating Load, the Cooling load density map also shows three areas of concentration and the area of highest density being with low Cooling load and low Relative Compactness
+  
+  
+  
+          
+####3.7 Hexbin and Density plotting of Heating/Cooling Load and Surface Area
+   
+  
+```{r}
+      ggplot(energy, aes(y = Heating.Load, x = Surface.Area )) + stat_binhex(bins = 10) + xlab("Surface Area") + ylab("Heating Load") + ggtitle("Density of points when comparing Heating Load and Surface Area")
+      ggplot(energy, aes(y = Cooling.Load, x = Surface.Area )) + stat_binhex(bins = 10) + xlab("Surface Area") + ylab("Cooling Load") + ggtitle("Density of points when comparing Heating Load and Surface Area")
+```
+      
++ This plot shows that for most houses it is common to have low Heating/Cooling load when the Surface Area is Large with maximum density around 750 units of Surface Area. Another area of higher density is when the Surface Area is around 600 units where a lot of houses have higher heating load of about 25.
++ Cooling load does not have very high density areas for when Surface Area is smaller; However for large Surface areas there seems to multiple areas of high density.
+        
+```{r}
+      ggplot(energy, aes(y = Heating.Load, x = Surface.Area )) + geom_point() + geom_density2d() + xlab("Surface Area") + ylab("Heating Load") + ggtitle("Density of points when comparing Heating Load and Surface Area")
+      ggplot(energy, aes(y = Cooling.Load, x = Surface.Area)) + geom_point() + geom_density2d() + xlab("Surface Area") + ylab("Cooling Load") + ggtitle("Density of points when comparing Heating Load and Surface Area")
+```
+    
++ The 2D density plot shows that there are around 3 areas of high density. They key area of high density being around low Heating load for High Surface Area.
++ For the Cooling load, the 2D density map shows higher density in areas of low Cooling load and high Surface Area.
+  
+  
+####3.8 Hexbin and Density plotting of Heating/Cooling Load and Wall Area
+        
+    
+```{r}
+      ggplot(energy, aes(y = Heating.Load, x = Wall.Area )) + stat_binhex(bins = 10) + xlab("Wall Area") + ylab("Heating Load") + ggtitle("Density of points when comparing Heating Load and Wall Area")
+      ggplot(energy, aes(y = Cooling.Load, x = Wall.Area )) + stat_binhex(bins = 10) + xlab("Wall Area") + ylab("Cooling Load") + ggtitle("Density of points when comparing Heating Load and Wall Area")
+```
+    
++ This hexbin plot shows that there are various areas of high density for intermediate size of Wall Area. This also shows that there is higher concentration of houses where the heating area is low and the houses have lower than average or higher than average Wall Area.
++ Cooling load shows similar distribution as heating load where Cooling Load is high and low for Wall Area of average size whereas the Cooling load is low for small or larger Wall Areas.
+        
+```{r}
+      ggplot(energy, aes(y = Heating.Load, x = Wall.Area )) + geom_point() + geom_density2d() + xlab("Wall Area") + ylab("Heating Load") + ggtitle("Density of points when comparing Heating Load and Wall Area")
+      ggplot(energy, aes(y = Cooling.Load, x = Wall.Area)) + geom_point() + geom_density2d() + xlab("Wall Area") + ylab("Cooling Load") + ggtitle("Density of points when comparing Heating Load and Wall Area")
+```
+  
++ The 2D density plot shows many points of high density, similar to the Hexabin plot for both Heating and Cooling load.  
+  
+  
+  
+    
+####3.9 Hexbin and Density plotting of Heating/Cooling Load and Roof Area, Overall Height, Orientation and Glazing Area  
+  
+    
+```{r}
+ggplot(energy, aes(y = Heating.Load, x = Roof.Area )) + stat_binhex(bins = 10) + xlab("Roof Area") + ylab("Heating Load") + ggtitle("Density of points when comparing Heating Load and Roof Area")
+ggplot(energy, aes(y = Cooling.Load, x = Roof.Area )) + stat_binhex(bins = 10) + xlab("Roof Area") + ylab("Cooling Load") + ggtitle("Density of points when comparing Heating Load and Roof Area")
+
+ggplot(energy, aes(y = Heating.Load, x = Roof.Area )) + geom_point() + geom_density2d() + xlab("Roof Area") + ylab("Heating Load") + ggtitle("Density of points when comparing Heating Load and Roof Area")
+ggplot(energy, aes(y = Cooling.Load, x = Roof.Area)) + geom_point() + geom_density2d() + xlab("Roof Area") + ylab("Cooling Load") + ggtitle("Density of points when comparing Heating Load and Roof Area")
+
+
+ggplot(energy, aes(y = Heating.Load, x = Overall.Height )) + stat_binhex(bins = 10) + xlab("Overall Height") + ylab("Heating Load") + ggtitle("Density of points when comparing Heating Load and Overall Height")
+ggplot(energy, aes(y = Cooling.Load, x = Overall.Height )) + stat_binhex(bins = 10) + xlab("Overall Height") + ylab("Cooling Load") + ggtitle("Density of points when comparing Heating Load and Overall Height")
+
+ggplot(energy, aes(y = Heating.Load, x = Overall.Height )) + geom_point() + geom_density2d() + xlab("Overall Height") + ylab("Heating Load") + ggtitle("Density of points when comparing Heating Load and Overall Height")
+ggplot(energy, aes(y = Cooling.Load, x = Overall.Height)) + geom_point() + geom_density2d() + xlab("Overall Height") + ylab("Cooling Load") + ggtitle("Density of points when comparing Heating Load and Overall Height")
+
+
+ggplot(energy, aes(y = Heating.Load, x = Orientation )) + stat_binhex(bins = 10) + xlab("Orientation") + ylab("Heating Load") + ggtitle("Density of points when comparing Heating Load and Orientation")
+ggplot(energy, aes(y = Cooling.Load, x = Orientation )) + stat_binhex(bins = 10) + xlab("Orientation") + ylab("Cooling Load") + ggtitle("Density of points when comparing Heating Load and Orientation")
+
+ggplot(energy, aes(y = Heating.Load, x = Orientation )) + geom_point() + geom_density2d() + xlab("Orientation") + ylab("Heating Load") + ggtitle("Density of points when comparing Heating Load and Orientation")
+ggplot(energy, aes(y = Cooling.Load, x = Orientation)) + geom_point() + geom_density2d() + xlab("Orientation") + ylab("Cooling Load") + ggtitle("Density of points when comparing Heating Load and Orientation")
+      
+ggplot(energy, aes(y = Heating.Load, x = Glazing.Area )) + stat_binhex(bins = 10) + xlab("Glazing Area") + ylab("Heating Load") + ggtitle("Density of points when comparing Heating Load and Glazing Area")
+ggplot(energy, aes(y = Cooling.Load, x = Glazing.Area )) + stat_binhex(bins = 10) + xlab("Glazing Area") + ylab("Cooling Load") + ggtitle("Density of points when comparing Heating Load and Glazing Area")
+
+ggplot(energy, aes(y = Heating.Load, x = Glazing.Area )) + geom_point() + geom_density2d() + xlab("Glazing Area") + ylab("Heating Load") + ggtitle("Density of points when comparing Heating Load and Glazing Area")
+ggplot(energy, aes(y = Cooling.Load, x = Glazing.Area)) + geom_point() + geom_density2d() + xlab("Glazing Area") + ylab("Cooling Load") + ggtitle("Density of points when comparing Heating Load and Glazing Area")
+      
+```
+  
++ 
+
+
+
+```{r}
+    
+    for(name in names(energy)){
+      print(ggplot(energy, aes_string(y = "Heating.Load", x = name )) + geom_point() + geom_density2d())
+      print(ggplot(energy, aes_string(y = "Heating.Load", x = name )) + stat_binhex(bins = 10))
+    }
+      
+```    
+   
+   
+   
+    ggplot(energy, aes(y = Heating.Load, x = Relative.Compactness )) + geom_point() + geom_density2d()
+    ggplot(energy, aes(y = Heating.Load, x = Surface.Area )) + geom_point() + geom_density2d()
+    ggplot(energy, aes(y = Heating.Load, x = Wall.Area )) + geom_point() + geom_density2d()
+    ggplot(energy, aes(y = Heating.Load, x = Roof.Area )) + geom_point() + geom_density2d()
+    ggplot(energy, aes(y = Heating.Load, x = Overall.Height )) + geom_point() + geom_density2d()
+    ggplot(energy, aes(y = Heating.Load, x = Orientation )) + geom_point() + geom_density2d()
+    ggplot(energy, aes(y = Heating.Load, x = Glazing.Area )) + geom_point() + geom_density2d()
+    ggplot(energy, aes(y = Heating.Load, x = Glazing.Area.Distribution )) + geom_point() + geom_density2d()
+    
+    
+    ggplot(energy, aes(y = Heating.Load, x = Relative.Compactness )) + stat_binhex(bins = 10)
+    ggplot(energy, aes(y = Heating.Load, x = Surface.Area )) + stat_binhex(bins = 10)
+    ggplot(energy, aes(y = Heating.Load, x = Wall.Area )) + stat_binhex(bins = 10)
+    ggplot(energy, aes(y = Heating.Load, x = Roof.Area )) + stat_binhex(bins = 10)
+    ggplot(energy, aes(y = Heating.Load, x = Overall.Height )) + stat_binhex(bins = 10)
+    ggplot(energy, aes(y = Heating.Load, x = Orientation )) + stat_binhex(bins = 10)
+    ggplot(energy, aes(y = Heating.Load, x = Glazing.Area )) + stat_binhex(bins = 10)
+    ggplot(energy, aes(y = Heating.Load, x = Glazing.Area.Distribution )) + stat_binhex(bins = 10)
+    
+    ggplot(energy, aes(y = Heating.Load, x = Surface.Area)) + geom_point(, alpha = 0.3)
+    ggplot(energy, aes(y = Heating.Load, x = Surface.Area)) + geom_point(aes (size = Wall.Area), alpha = 0.3)
+    
