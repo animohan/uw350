@@ -5,6 +5,9 @@ date: "January 25, 2017"
 output: html_document
 ---
 ##1. Summary and/or Key Conclusions
++ Facet plot showed us that the lowest heating load happens with highest surface area, highest Roof Area and lowest Overall Height in all orientations
++ Correlation plot showed that there is negative Correlation between Surface Area and Overall Height. Additionally it also showed a -ve correlation between  Surface Area and Heating/Cooling Load.
++ Orientation of the house does not seem to have any correlation or impact to Heating and Cooling load. Additionally, the Orientation of the house seems to be independent of all other parameters of measurement.
 
 ##2. Reviewing Data
 
@@ -86,7 +89,7 @@ library(ggplot2)
 ####3.4 Heating and Cooling Load as a function of Surface area segmented along Overall Height.  
   
   
-    ```{r}
+```{r}
       ggplot(energy, aes(y = Heating.Load, x = Surface.Area)) + geom_point(aes(color = as.factor(Overall.Height), alpha = 0.3)) + xlab("Surface Area") + ylab("Heating Load") + ggtitle("Impact of Surface Area and Overall Height on Heating Load ")
       
       ggplot(energy, aes(y = Cooling.Load, x = Surface.Area)) + geom_point(aes(color = as.factor(Overall.Height))) + xlab("Surface Area") + ylab("Cooling Load") + ggtitle("Impact of Surface Area and Overall Height on Cooling Load ")
@@ -187,60 +190,89 @@ ggplot(energy, aes(y = Cooling.Load, x = Roof.Area)) + geom_point() + geom_densi
 
 
 ggplot(energy, aes(y = Heating.Load, x = Overall.Height )) + stat_binhex(bins = 10) + xlab("Overall Height") + ylab("Heating Load") + ggtitle("Density of points when comparing Heating Load and Overall Height")
-ggplot(energy, aes(y = Cooling.Load, x = Overall.Height )) + stat_binhex(bins = 10) + xlab("Overall Height") + ylab("Cooling Load") + ggtitle("Density of points when comparing Heating Load and Overall Height")
+ggplot(energy, aes(y = Cooling.Load, x = Overall.Height )) + stat_binhex(bins = 10) + xlab("Overall Height") + ylab("Cooling Load") + ggtitle("Density of points when comparing Cooling Load and Overall Height")
 
 ggplot(energy, aes(y = Heating.Load, x = Overall.Height )) + geom_point() + geom_density2d() + xlab("Overall Height") + ylab("Heating Load") + ggtitle("Density of points when comparing Heating Load and Overall Height")
-ggplot(energy, aes(y = Cooling.Load, x = Overall.Height)) + geom_point() + geom_density2d() + xlab("Overall Height") + ylab("Cooling Load") + ggtitle("Density of points when comparing Heating Load and Overall Height")
+ggplot(energy, aes(y = Cooling.Load, x = Overall.Height)) + geom_point() + geom_density2d() + xlab("Overall Height") + ylab("Cooling Load") + ggtitle("Density of points when comparing Cooling Load and Overall Height")
 
 
 ggplot(energy, aes(y = Heating.Load, x = Orientation )) + stat_binhex(bins = 10) + xlab("Orientation") + ylab("Heating Load") + ggtitle("Density of points when comparing Heating Load and Orientation")
-ggplot(energy, aes(y = Cooling.Load, x = Orientation )) + stat_binhex(bins = 10) + xlab("Orientation") + ylab("Cooling Load") + ggtitle("Density of points when comparing Heating Load and Orientation")
+ggplot(energy, aes(y = Cooling.Load, x = Orientation )) + stat_binhex(bins = 10) + xlab("Orientation") + ylab("Cooling Load") + ggtitle("Density of points when comparing Cooling Load and Orientation")
 
 ggplot(energy, aes(y = Heating.Load, x = Orientation )) + geom_point() + geom_density2d() + xlab("Orientation") + ylab("Heating Load") + ggtitle("Density of points when comparing Heating Load and Orientation")
-ggplot(energy, aes(y = Cooling.Load, x = Orientation)) + geom_point() + geom_density2d() + xlab("Orientation") + ylab("Cooling Load") + ggtitle("Density of points when comparing Heating Load and Orientation")
+ggplot(energy, aes(y = Cooling.Load, x = Orientation)) + geom_point() + geom_density2d() + xlab("Orientation") + ylab("Cooling Load") + ggtitle("Density of points when comparing Cooling Load and Orientation")
       
 ggplot(energy, aes(y = Heating.Load, x = Glazing.Area )) + stat_binhex(bins = 10) + xlab("Glazing Area") + ylab("Heating Load") + ggtitle("Density of points when comparing Heating Load and Glazing Area")
-ggplot(energy, aes(y = Cooling.Load, x = Glazing.Area )) + stat_binhex(bins = 10) + xlab("Glazing Area") + ylab("Cooling Load") + ggtitle("Density of points when comparing Heating Load and Glazing Area")
+ggplot(energy, aes(y = Cooling.Load, x = Glazing.Area )) + stat_binhex(bins = 10) + xlab("Glazing Area") + ylab("Cooling Load") + ggtitle("Density of points when comparing Cooling Load and Glazing Area")
 
 ggplot(energy, aes(y = Heating.Load, x = Glazing.Area )) + geom_point() + geom_density2d() + xlab("Glazing Area") + ylab("Heating Load") + ggtitle("Density of points when comparing Heating Load and Glazing Area")
-ggplot(energy, aes(y = Cooling.Load, x = Glazing.Area)) + geom_point() + geom_density2d() + xlab("Glazing Area") + ylab("Cooling Load") + ggtitle("Density of points when comparing Heating Load and Glazing Area")
+ggplot(energy, aes(y = Cooling.Load, x = Glazing.Area)) + geom_point() + geom_density2d() + xlab("Glazing Area") + ylab("Cooling Load") + ggtitle("Density of points when comparing Cooling Load and Glazing Area")
       
 ```
   
-+ 
-
-
++ These density and hexbin maps show that it is common to have low heating and cooling load  when the roof area is larger. Additionally, they show that it is also common to have low heating and cooling load when the overall height of the building is lower. When categorized by orientation, many houses in each orientation had low heating and cooling load. Lastly there were high count of houses with low cooling and heating load with different Glazing areas.
 
 ```{r}
-    
-    for(name in names(energy)){
-      print(ggplot(energy, aes_string(y = "Heating.Load", x = name )) + geom_point() + geom_density2d())
-      print(ggplot(energy, aes_string(y = "Heating.Load", x = name )) + stat_binhex(bins = 10))
-    }
-      
-```    
-   
-   
-   
-    ggplot(energy, aes(y = Heating.Load, x = Relative.Compactness )) + geom_point() + geom_density2d()
-    ggplot(energy, aes(y = Heating.Load, x = Surface.Area )) + geom_point() + geom_density2d()
-    ggplot(energy, aes(y = Heating.Load, x = Wall.Area )) + geom_point() + geom_density2d()
-    ggplot(energy, aes(y = Heating.Load, x = Roof.Area )) + geom_point() + geom_density2d()
-    ggplot(energy, aes(y = Heating.Load, x = Overall.Height )) + geom_point() + geom_density2d()
-    ggplot(energy, aes(y = Heating.Load, x = Orientation )) + geom_point() + geom_density2d()
-    ggplot(energy, aes(y = Heating.Load, x = Glazing.Area )) + geom_point() + geom_density2d()
-    ggplot(energy, aes(y = Heating.Load, x = Glazing.Area.Distribution )) + geom_point() + geom_density2d()
-    
-    
-    ggplot(energy, aes(y = Heating.Load, x = Relative.Compactness )) + stat_binhex(bins = 10)
-    ggplot(energy, aes(y = Heating.Load, x = Surface.Area )) + stat_binhex(bins = 10)
-    ggplot(energy, aes(y = Heating.Load, x = Wall.Area )) + stat_binhex(bins = 10)
-    ggplot(energy, aes(y = Heating.Load, x = Roof.Area )) + stat_binhex(bins = 10)
-    ggplot(energy, aes(y = Heating.Load, x = Overall.Height )) + stat_binhex(bins = 10)
-    ggplot(energy, aes(y = Heating.Load, x = Orientation )) + stat_binhex(bins = 10)
-    ggplot(energy, aes(y = Heating.Load, x = Glazing.Area )) + stat_binhex(bins = 10)
-    ggplot(energy, aes(y = Heating.Load, x = Glazing.Area.Distribution )) + stat_binhex(bins = 10)
-    
-    ggplot(energy, aes(y = Heating.Load, x = Surface.Area)) + geom_point(, alpha = 0.3)
-    ggplot(energy, aes(y = Heating.Load, x = Surface.Area)) + geom_point(aes (size = Wall.Area), alpha = 0.3)
-    
+library(car)
+library(corrplot)
+library(ellipse)
+```
+
+
+####3.10 Scatter correlation plot
+
+```{r}
+scatterplotMatrix(~ Relative.Compactness + Surface.Area + Wall.Area+ Roof.Area + Overall.Height + Orientation + Glazing.Area + Heating.Load + Cooling.Load, data = energy)
+```
+
++ Scatterplot shows
+  + high correlation between  Relative.Compactness and Surface.Area.
+  + independences of Heating/Cooling load w.r.t to Orientation.
+  + Positve Correlation between Heating/Cooling load and Glazing Area.
+  + Clear sepeartion of low and high Overall height impacting Heating/Cooling load.
+  + Negative Correlation of Roof Area and heating and cooling load.
+
+####3.11 Ellispe Correlation plot
+
+```{r}
+R = cor(energy[,c("Relative.Compactness","Surface.Area","Wall.Area","Roof.Area","Overall.Height","Orientation","Glazing.Area","Glazing.Area.Distribution","Heating.Load","Cooling.Load")], method= 'pearson')
+plotcorr(R, col = colorRampPalette(c("firebrick3", "white", "navy"))(10))
+```
+
++ Elliptical Correlation plot shows:
+
+  + Negative correlation between  Relative.Compactness and Roof Area, Surface Area
+  + Postive correlation of Surface Area with Roof Area and Overall Height
+  + Independences of Heating/Cooling load w.r.t to Orientation.
+  + Indendpendenc of Glazing Area to most of other factors.
+  + Positve Correlation between Heating/Cooling load and Overall Height, Wall Area
+  + Negative Correlation between heating/Cooling load and Surface Area and Roof Area.
+
+
+####3.12 Another Correlation Plot:
+
+```{r}
+corrplot(R, method="circle", type='lower')
+```
+
++ This correlation plot shows:
+  + Negative Correlation between Relative.Compactness and Surface Area, Roof Area
+  + Positive Correlation between Relative.Compactness and Heating/Coolging load.
+  + Positive Correltion between Surface Area and Roof Area.
+  + Negative Correlation  between Surface Area and Overall Height. Also -ve correlation between  Surface Area and Heating/Cooling Load.
+  + Positive Correlationb etween Overall Height and Heating/Cooling load.
+  
+  
+
+####3.13 Facet plot
+
+```{r}
+options(repr.plot.width=8, repr.plot.height=11)
+ggplot(energy, aes(Surface.Area, Heating.Load)) + geom_point(aes(color = factor(Overall.Height), size = Wall.Area), alpha = 0.3) + facet_grid(Orientation ~ Roof.Area) + xlab('Surface Area') + ylab(' Heating Load') + ggtitle('Relationship between Heating Load and Surface Area, with two different Overall Heights and the Grid showing distribution for different orientations and Roof Area \n with marker radius indicating Wall Area')
+```
+
++ The facet plot shows that:
+  + Heating Load distribution seems to be similar among all orientations. 
+  + Lowest heating load happens with highest surface area, highest Roof Area and lower Overall Height in all orientations
+  + Highest heating load happes with intermediate Surface Area, highest Overall height and intermediate Roof.Area.
+  + Higher heating load is associated with lowest Roof area in all orientations and it is also associated with intermediate Wall.Area.
