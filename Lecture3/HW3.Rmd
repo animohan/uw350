@@ -1,0 +1,120 @@
+---
+title: "HW3"
+author: "Anish Mohan"
+date: "February 1, 2017"
+output: html_document
+---
+
+# Monty Hall Simulation:
+
+Here a simulation of the Monty Hall Problem is shown. For this simulation we assume that the prize (e.g car) can be behind any of one of the 3 doors with equal probability. Additionally, we also assume that the contestant can choose any one of the doors with equal probability. After the contestant chooses a door, Monty Hall can open another door that does not have the prize. Now the contestant must decide if he will switch to the remaining door or stay with their initial choice. In this simulation, results of both strategies are shown.
+
+```{r, cache = TRUE}
+
+library(ggplot2)
+monty.hall.simulation = function(n){
+  # n = number of simulations
+  
+  # Random selction of the door which will have the prize/car
+  prize = runif(n)
+  prize.Door = ifelse(prize <= 0.33,1, ifelse(prize <=0.66,2,3)) 
+  
+  # Random selection of the door chosen by the contestant
+  chosen = runif(n)
+  chosen.Door = ifelse(chosen <= 0.33,1, ifelse(chosen  <=0.66,2,3))
+  
+  # Door chosen by Monty
+  Monty.Door = matrix(NA,n,1)
+  
+  # Column to hold the result if a contestant will win by switching the door.
+  switch.Win = matrix(NA,n,1)
+  
+  # Column to hold the result if a contestant will win by staying with the same door
+  stay.Win = matrix(NA,n,1)
+  
+  # Collecting data into a data frame
+  exp = data.frame(prize.Door, chosen.Door, Monty.Door, switch.Win, stay.Win)
+  colnames(exp) = c("PrizeDoor","ChosenDoor", "MontyDoor", "SwitchWin","StayWin")
+  
+  # Running simulations
+  for(i in 1:n){
+    
+    # If the contestant chooses a door that contains the prize, then Monty can open any of the other doors with equal probability
+    if(exp[i,]$PrizeDoor==exp[i,]$ChosenDoor){
+      if(exp[i,]$PrizeDoor == 1){ exp[i,]$MontyDoor = ifelse(runif(1)<=0.5,2,3)}
+      if(exp[i,]$PrizeDoor == 2){ exp[i,]$MontyDoor = ifelse(runif(1)<=0.5,1,3)}
+      if(exp[i,]$PrizeDoor == 3){ exp[i,]$MontyDoor = ifelse(runif(1)<=0.5,1,2)}
+    }
+  
+    #If the contestant does not choose the door with the prize, then Monty can only open a door that is guaranteed not have the prize/car.
+    else{
+  
+      if(exp[i,]$PrizeDoor == 1 && exp[i,]$ChosenDoor==2 ){ exp[i,]$MontyDoor = 3}
+      if(exp[i,]$PrizeDoor == 1 && exp[i,]$ChosenDoor==3 ){ exp[i,]$MontyDoor = 2}
+      if(exp[i,]$PrizeDoor == 2 && exp[i,]$ChosenDoor==3 ){ exp[i,]$MontyDoor = 1}
+      if(exp[i,]$PrizeDoor == 2 && exp[i,]$ChosenDoor==1 ){ exp[i,]$MontyDoor = 3}
+      if(exp[i,]$PrizeDoor == 3 && exp[i,]$ChosenDoor==1 ){ exp[i,]$MontyDoor = 2}
+      if(exp[i,]$PrizeDoor == 3 && exp[i,]$ChosenDoor==2 ){ exp[i,]$MontyDoor = 1}
+  
+    }
+  
+  # Frequency of Contestant winning by staying with thier initially chosen door
+    if(exp[i,]$PrizeDoor==exp[i,]$ChosenDoor){
+      exp[i,]$SwitchWin = 0
+      exp[i,]$StayWin = 1}
+  
+  # Frequency of contestant winning by switching to a new door
+    if(exp[i,]$PrizeDoor!=exp[i,]$ChosenDoor){
+      exp[i,]$SwitchWin = 1
+      exp[i,]$StayWin = 0}
+  }
+  
+  return(exp)
+}
+
+# Vector for storing number of simualtions
+no.simulations = c(25,50,75,100,250,500,750,1000,2500,5000,7500,10000)
+
+#Vector for Storing results
+result.mat = matrix(NA, nrow = length(no.simulations), ncol = 5)
+colnames(result.mat) = c("SimulationNumber","SwitchWin","SwitchLose","StayWin","StayLose")
+
+#counter variable
+i = 1
+#a = monty.hall.simulation(1000)
+
+for (sim in no.simulations){
+  exp.results = monty.hall.simulation(sim)
+  result.mat[i,] = c(sim, sum(exp.results$SwitchWin), sim-sum(exp.results$SwitchWin), sum(exp.results$StayWin), sim-sum(exp.results$StayWin))
+  i = i + 1
+}
+#
+result.mat = data.frame(result.mat)
+
+#Copying data to generate probability
+result.mat2 = result.mat
+# Generating probabilities
+result.mat2$StayWin = result.mat2$StayWin/result.mat2$SimulationNumber
+result.mat2$StayLose = result.mat2$StayLose/result.mat2$SimulationNumber
+result.mat2$SwitchWin = result.mat2$SwitchWin/result.mat2$SimulationNumber
+result.mat2$SwitchLose = result.mat2$SwitchLose/result.mat2$SimulationNumber
+```
+
+##Plotting Frequency of Winning/Losing
+```{r}
+ggplot(result.mat, aes(SimulationNumber)) + geom_point(aes(y = SwitchWin, color = "Frequency of Winning")) + geom_point(aes(y = SwitchLose, color = "Frequency of Losing")) + xlab("Number of Simulations") + ylab("Frequency") + ggtitle("Monty Hall: Strategy of always Switching the door")
+
+ggplot(result.mat, aes(SimulationNumber)) + geom_point(aes(y = StayWin, color = "Frequency of Winning")) + geom_point(aes(y = StayLose, color = "Frequency of Losing")) + xlab("Number of Simulations") + ylab("Frequency") + ggtitle("Monty Hall: Strategy of staying with the initially chosen door")
+```
+
+
+##Plotting Probability of Winning/Losing
+```{r}
+ggplot(result.mat2, aes(SimulationNumber)) + geom_line(aes(y = SwitchWin, color = "Probability of Winning ")) + geom_line(aes(y = SwitchLose, color = "Probability of Losing")) + xlab("Number of Simualtions") + ylab("Probability") + ggtitle(" Monty Hall: Strategy of always Switching the door")
+
+ggplot(result.mat2, aes(SimulationNumber)) + geom_line(aes(y = StayWin, color = "Probability of Winning ")) + geom_line(aes(y = StayLose, color = "Probability of Losing")) + xlab("Number of Simualtions") + ylab("Probability") + ggtitle(" Monty Hall: Strategy of staying with the initially chosen door")
+```
+
+
+```
+

@@ -1,0 +1,104 @@
+---
+title: "Florence Nightingale"
+author: "Anish Mohan"
+date: "January 27, 2017"
+output: html_document
+---
+
+```{r}
+# This is a copy of prof's Nightingale.rmd. It is only use for practicing with database.
+#Required Libraries
+library(HistData)
+library(ggplot2)
+library(gridExtra)
+library(car)
+library(corrplot)
+library(simpleboot)
+```
+
+You can also embed plots, for example:
+
+```{r, cache= TRUE}
+dim(Nightingale)
+str(Nightingale)
+summary(Nightingale)
+
+ggplot(Nightingale, aes(Date, Army)) + geom_point(size = 5) + geom_line() + ggtitle("Size of British Army in Crimean War") + ylab("Size of Army")
+
+plot.line = function(col, color, ylab) {
+  ggplot(Nightingale) + 
+    geom_line(aes_string("Date",col), color = color, size = 2) + ylab(ylab)
+}
+
+
+plot.Crimea = function(){
+  p1 = plot.line("Wounds.rate","red","Rate of Wounds")
+  p1 = p1 + ggtitle("Casualty rates per 1000 by date for Crimean War + Size of Army")
+  p2 = plot.line("Other.rate","DarkBlue","Rate of Other deaths")
+  p3 = plot.line("Disease.rate","black","Rate of Disease")
+  p4 = plot.line("Army","green","Size of Army")
+  grid.arrange(p1,p2,p3,p4, nrow = 4)
+}
+
+plot.Crimea()
+
+
+# Changing column to reflect disease per 1000
+colsIn = c("Disease", "Wounds", "Other")
+colsOut = c("Disease.rate","Wounds.rate","Other.rate")
+Nightingale[,colsOut] = lapply(colsIn, 
+                                     function(x){
+                                       1000*Nightingale[,x]/Nightingale$Army
+                                     })
+plot.Crimea()
+
+ggplot(Nightingale) + 
+  geom_line(aes(Date, Wounds.rate), color = "red", size = 2)  + 
+  geom_line(aes(Date, Other.rate), color = "DarkBlue", size = 2) +
+  geom_line(aes(Date, Disease.rate), size = 2) +
+  ggtitle("Rate of casulaties vs. Date") + 
+  ylab("Rate of Casualities per 1000")
+  
+
+#Plotting correlations
+scatterplotMatrix(~ Disease.rate + Wounds.rate + Other.rate + Army, data = Nightingale)
+
+cols = c("Disease.rate", "Wounds.rate", "Other.rate", "Army")
+cors = cor(Nightingale[,cols], method = "pearson")
+corrplot.mixed(cors, upper = "ellipse")
+
+#Examinse Distribution of these Data
+before = Nightingale[Nightingale$Date<="1855-03-01",]
+after  = Nightingale[Nightingale$Date> "1855-03-01",]
+dim(before)
+dim(after)
+
+xlims = range(Nightingale$Disease.rate)
+xlims
+
+ggplot(before, aes(Disease.rate)) + geom_histogram(aes(y = ..density..), alpha = 0.2) + geom_density(color = "red")
+#..density.. histogram with density instead of counts on y axis
+
+p1 = ggplot(before, aes(Disease.rate)) + geom_density(color = "red") +
+     geom_histogram(aes(y = ..density..), alpha = 0.2) + xlim(xlims) +
+     ggtitle("Rate of deaths from disease before and after March 1955") +
+     xlab("Disease death rate")
+
+p2 = ggplot(after, aes(Disease.rate)) + geom_density(color = "red") + 
+     geom_histogram(aes(y = ..density..), alpha = 0.2) + xlim(xlims) + 
+     xlab("Disease death rate")
+
+grid.arrange(p1,p2, nrow =2)
+
+
+#Change in distribution of combat deaths
+xlims = range(Nightingale$Wounds.rate)
+xlims
+
+p1 = ggplot(before, aes(Wounds.rate)) + geom_density(color = "red") + geom_histogram(aes(y = ..density..), alpha = 0.2) +xlims(xlim) + ggtitle("Rate of deaths from wounds before and after March 1955") + xlab("Would death rate")
+
+p2 = ggplot(after, aes(Wounds.rate)) + geom_density(color= "red") + geom_histogram(aes(y = ..density..), alpha = 0.2) 
+
+```
+
+Note that the `echo = FALSE` parameter was added to the code chunk to prevent printing of the R code that generated the plot.

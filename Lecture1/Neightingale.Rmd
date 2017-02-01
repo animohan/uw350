@@ -31,7 +31,7 @@ However, we cannot reject the hypothesis that combat deaths from wounds decrease
 
 Like all good data scientists, Florance Nightingale used visualization to both explore her data set and to present the results of her analysis to a skeptical British public and Parlament. Here is an image of the original graphic which Nightingale used to convince the British Parlament of the effectiveness of sanitation officers.
 
-![Original Nightingale Grapic](C:\Users\StevePC2\Dropbox\UW\DataSci350\Summer 2016\Lecture 1\Nightingale-graphic.jpg)
+![Original Nightingale Grapic](Nightingale-graphic.jpg)
 
 This graphic is remarkable both for the amount of information displayed and considering the state of analytics 160 year ago. In our era we have many more tools at our disposal that Florance Nightingale could have imagined. Let's have a look at what we can do with these tools.
 
