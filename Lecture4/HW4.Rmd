@@ -8,23 +8,282 @@ output: html_document
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
 ```
+# Summary
+* In Auto dataset, Log(Price) has a distribution closer to Normal than Price as shown by QQ plot and K-S Statistics
+* There is not a signifincant difference in auto prices depending for Fuel type.
+* There is significant difference in auto prices dependeing on FWD vs RWD
+* There is significant difference in prices based on aspiration (standard vs awd)
+* Two Door vs Four Door does not have significant impact on price.
+* Different Body styles have significant impact on the price.
 
-## R Markdown
 
-This is an R Markdown document. Markdown is a simple formatting syntax for authoring HTML, PDF, and MS Word documents. For more details on using R Markdown see <http://rmarkdown.rstudio.com>.
+#Q1: Testing Normality
 
-When you click the **Knit** button a document will be generated that includes both content as well as the output of any embedded R code chunks within the document. You can embed an R code chunk like this:
+#### Q1:Compare and test Normality the distributions of price and log price.Use both a graphical method and a formal test.
 
-```{r cars}
-summary(cars)
+```{r, echo = FALSE}
+#Reading the data
+auto = read.csv("Automobile price data _Raw_.csv", header = TRUE, stringsAsFactors = FALSE)
+numcols = c("price","bore","stroke","horsepower","peak.rpm")
+auto[, numcols] <- lapply(auto[, numcols], as.numeric)
+
+# Removing rows with NAs
+auto = auto[complete.cases(auto),]
 ```
 
-## Including Plots
 
-You can also embed plots, for example:
+#### Testing the normality of the data with Q-Q Plot
 
-```{r pressure, echo=FALSE}
-plot(pressure)
+```{r}
+# Normality of Price (In Automobile):
+auto.price = auto$price
+auto.log.price = log(auto$price)
+qqnorm(auto.price, main = "Q-Q Plot of Auto - Price")
+qqnorm(auto.log.price, main = "Q-Q Plot of Auto - Log(Price)")
 ```
 
-Note that the `echo = FALSE` parameter was added to the code chunk to prevent printing of the R code that generated the plot.
+A Visual inspection of the Q-Q Plot shows that the points of log(price) are closer to a straight line compared to price of the Autos.
+
+#### K-S Test for normality
+
+```{r, cache = TRUE}
+norm1 = rnorm(200,mean=0,sd=1)
+
+# KS Test for normality
+
+#Scaling and Centring variable for the K-S Test
+auto.log.price.scaled = scale(auto.log.price, center = TRUE, scale = TRUE)
+auto.price.scaled = scale(auto.price, center = TRUE, scale = TRUE)
+summary(auto.log.price.scaled)
+summary(auto.price.scaled)
+
+#Plotting CDF Curve
+plot(ecdf(auto.log.price.scaled), col = "blue", main = "CDF of Auto- Price", xlab = "Auto Price", ylab = "Cumulative Density")
+lines(ecdf(norm1), col = "red")
+```
+
+
+#### Calculating K-S Statistics
+```{r}
+
+# Defining x variables.
+x_seq = seq(-3,4,len=200)
+
+# Building the CDF for the Normally Distributed Variable.
+norm.cdf = sapply(x_seq, function(x){
+  sum(norm1<x)/length(norm1)
+})
+
+# Building the CDF for log(Price) of the Auto.
+log.price.cdf = sapply(x_seq, function(x){
+  sum(auto.log.price.scaled<x)/length(auto.log.price.scaled)
+})
+
+# Building the CDF for Price of the Auto
+price.cdf = sapply(x_seq, function(x){
+  sum(auto.price.scaled<x)/length(auto.price.scaled)
+})
+
+# Calculating K-S Statistic
+k_s_stat = max(abs(norm.cdf - log.price.cdf))
+
+# Location of the max value
+k_index = which.max(abs(norm.cdf - log.price.cdf))
+
+k_s_x = x_seq[k_index]
+plot(x_seq,norm.cdf, col='blue', pch=16, main ='CDFs of standardized samples', 
+     xlab = 'Value', ylab = 'Cumulative density')
+points(x_seq,log.price.cdf,col='red', pch=16)
+lines(c(k_s_x,k_s_x), c(norm.cdf[k_index],log.price.cdf[k_index]),
+      col='black', lwd=8)
+
+#Printing K-S Value
+print(paste0("Comparing Normal CDF and Log Price CDF: K-S=", k_s_stat))
+print(paste0("Empirical P-Value =", k_s_stat/1000))
+
+k_s_stat = max(abs(norm.cdf - price.cdf))
+
+# where does it occur?
+k_index = which.max(abs(norm.cdf - price.cdf))
+k_s_x = x_seq[k_index]
+plot(x_seq, norm.cdf, col='blue', pch=16, main ='CDFs of standardized samples', 
+     xlab = 'Value', ylab = 'Cumulative density')
+points(x_seq,price.cdf,col='red', pch=16)
+lines(c(k_s_x,k_s_x), c(norm.cdf[k_index],price.cdf[k_index]),
+      col='black', lwd=8)
+print(paste0("Comparing Normal CDF and Auto Price CDF: K-S=", k_s_stat))
+print(paste0("Empirical P-Value =", k_s_stat/1000))
+```
+   
+   
+K-S Statistic also shows there is lower deviation between a std normal distribution and Log(Auto Price) compared to Std Normal distribution and Auto Price.
+   
+      
+   
+   
+## Q2 Testing Significance stratified with variables
+   
+#### Test significance of price (log price) stratified by a) fuel type, b) aspiration, and c) rear vs. front wheel drive. Use both graphical methods and the formal test.
+   
+      
+
+
+```{r}
+# Plotting fuction for histogram of distributions
+plot.t <- function(a, b, cols = c('pop_A', 'pop_B'), nbins = 20){
+  maxs = max(c(max(a), max(b)))
+  mins = min(c(min(a), min(b)))
+  breaks = seq(maxs, mins, length.out = (nbins + 1))
+  par(mfrow = c(2, 1))
+  hist(a, breaks = breaks, main = paste('Histogram of', cols[1]), xlab = cols[1])
+  abline(v = mean(a), lwd = 4, col = 'red')
+  hist(b, breaks = breaks, main = paste('Histogram of', cols[2]), xlab = cols[2])
+  abline(v = mean(b), lwd = 4, col = 'red')
+  par(mfrow = c(1, 1))
+}
+```
+
+   
+#### Histogram comparing prices of different Fuel Type
+
+```{r}
+auto.gas.price = auto[auto$fuel.type=="gas",]$price
+auto.diesel.price = auto[auto$fuel.type == "diesel",]$price
+
+plot.t(auto.gas.price, auto.diesel.price, cols = c("Auto Price: Fuel Type = Gas","Auto Price: Fuel Type = Diesel"))
+```
+   
+The histogram shows that there is large standard deviation in the Auto prices. The mean price of the Auto of fuel.type = gas and fuel.type = diesel seem to be close.
+
+#### Student-t test measuring the difference in mean values of prices based on fuel type
+```{r}
+t.test(auto.gas.price, auto.diesel.price, alternative = "two.sided")
+```
+
+The p-value for the t-test is 0.1297 which is less than the significance value of 0.05, hence we cannot reject the null hypotheses. Hence the mean value of price of a gas and diesel vehicle are similar.
+   
+      
+#### Student-t test measuring the difference in mean values of prices based on Aspiration type
+
+```{r}
+auto.std.price = auto[auto$aspiration=="std",]$price
+auto.turbo.price = auto[auto$aspiration == "turbo",]$price
+plot.t(auto.std.price, auto.turbo.price, cols = c("Auto Price: Aspiration = Std","Auto Price: Aspiration = Turbo"))
+t.test(auto.std.price, auto.turbo.price)
+```
+   
+   
+The p-value is 0.0036 which is smaller than significance level of 0.05. With this we can reject the null hypothesis that the mean value of the price is same for turbo and standard vehicle. This test shows that mean value of the turbo and standard vehicles are different      
+
+
+#### Student-t test measuring the difference in mean values of prices based on Driver wheel type
+   
+      
+```{r}
+auto.rwd.price = auto[auto$drive.wheels=="rwd",]$price
+auto.fwd.price = auto[auto$drive.wheels == "fwd",]$price
+plot.t(auto.rwd.price, auto.fwd.price, cols = c("Auto Price: Drive Wheels = Rear","Auto Price: Drive Wheels = Front"))
+t.test(auto.rwd.price, auto.fwd.price)
+```
+   
+   
+The p-value is 4.49 e-15 which is way smaller than significance level of 0.05. With this we can reject the null hypothesis that the mean value of the price is same for Front wheel drive and Rear wheel drive vehicle. This test shows that mean value of the FWD  and RWD vehicles are different.
+   
+
+#Q3: Analysis of Variance
+
++ Apply ANOVA to the auto price data to compare the price (or log price if closer to a Normal distribution) of autos stratified by number of doors, and body style -  two sets of tests.
++ Graphically explore the differences between the price conditioned by the categories of each variable. Hint, make sure you have enough data for each category.
++ Use standard ANOVA and Tukey ANOVA to test the differences of these groups.
+
+
+#### Running Analysis of Variance and Tukey's Honest Significance Difference test
+```{r}
+#Boxplot
+boxplot(price~num.of.doors, data = auto)
+auto.door.aov = aov(price ~ as.factor(num.of.doors), data = auto)
+summary(auto.door.aov)
+print(auto.door.aov)
+```
+
+  + Since we did not eliminate entries which have "?" there are three categories shown for number of doors.
+  + p-value is 0.668; hence we cannot reject the null hypotheses that the price in categories are similar. 
+  + In the upcoming section, we will remove the '?' and just compare 2 doors and 4 door model
+
+
+```{r}
+tukey.door.anova = TukeyHSD(auto.door.aov)
+tukey.door.anova
+plot(tukey.door.anova)
+```
+
+  + In the pair wise comparison as well, the p-values are high hence there are no significant differences in price between the categories.
+
+
+
+```{r}
+boxplot(price~body.style, data = auto)
+auto.body.aov = aov(price ~ as.factor(body.style), data = auto)
+summary(auto.body.aov)
+print(auto.body.aov)
+```
+
++ The Analysis of Variance based on body.style gives a p-value of < 1.11e-06, hence we can reject the null-hypotheses and specify that there are significant differences in price dependent on the body style
+
+```{r}
+tukey.body.anova = TukeyHSD(auto.body.aov)
+tukey.body.anova
+plot(tukey.body.anova)
+```
+
+* Some p-values are low indicating significant differences in the price dependent on the body style
+  Following pairs have significanly different prices
+  + Hatchback and Convertible
+  + Wagon and Convertible 
+  + Hatchback and Hardtop 
+  + Sedan and Hardtop
+  + Wagon and Hardtop
+  + Sedan and Hatchback.
+  
+   
+
+#### Re-running ANOVA by keeping rows that have "?" strings
+```{r}
+#Reading the data
+auto = read.csv("Automobile price data _Raw_.csv", header = TRUE, stringsAsFactors = FALSE, na.strings = "?")
+numcols = c("price","bore","stroke","horsepower","peak.rpm")
+auto[, numcols] <- lapply(auto[, numcols], as.numeric)
+
+# Removing rows with NAs
+auto = auto[complete.cases(auto),]
+
+boxplot(price~num.of.doors, data = auto)
+auto.door.aov = aov(price ~ as.factor(num.of.doors), data = auto)
+summary(auto.door.aov)
+print(auto.door.aov)
+tukey.door.anova = TukeyHSD(auto.door.aov)
+tukey.door.anova
+plot(tukey.door.anova)
+
+boxplot(price~body.style, data = auto)
+auto.body.aov = aov(price ~ as.factor(body.style), data = auto)
+summary(auto.body.aov)
+print(auto.body.aov)
+tukey.body.anova = TukeyHSD(auto.body.aov)
+tukey.body.anova
+plot(tukey.body.anova)
+
+```
+
+* This shows results of running Analysis of Variance by keeping some of the unknown quantities
+  + We notice that price value of four door and 2 door are not significantly different as the p-value =0.04 <0.05
+  + Tukey HSD also gives similar results
+  + The plot for the body styles show that Convertibles are very different from rest of the car groups and AOV tests shows that the p-value is 3.6e-05, hence it is very different from the sample.
+  + Following body-style seems to have significanly difference prices.:
+    - Hardtop & Convertible
+    - Hatchback & Convertible.
+    - Wagon & Convertible
+    - Sedan & convertible
+    - Sedan & Hatchback
+  
+  

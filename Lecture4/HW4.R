@@ -80,18 +80,18 @@ plot.t <- function(a, b, cols = c('pop_A', 'pop_B'), nbins = 20){
   par(mfrow = c(1, 1))
 }
 
-auto.gas.price = auto.df[auto$fuel.type=="gas",]$price
-auto.diesel.price = auto.df[auto$fuel.type == "diesel",]$price
+auto.gas.price = auto[auto$fuel.type=="gas",]$price
+auto.diesel.price = auto[auto$fuel.type == "diesel",]$price
 plot.t(auto.gas.price, auto.diesel.price, cols = c("Auto Price: Fuel Type = Gas","Auto Price: Fuel Type = Diesel"))
 t.test(auto.gas.price, auto.diesel.price)
 
-auto.std.price = auto.df[auto$aspiration=="std",]$price
-auto.turbo.price = auto.df[auto$aspiration == "turbo",]$price
+auto.std.price = auto[auto$aspiration=="std",]$price
+auto.turbo.price = auto[auto$aspiration == "turbo",]$price
 plot.t(auto.std.price, auto.turbo.price, cols = c("Auto Price: Aspiration = Std","Auto Price: Aspiration = Turbo"))
 t.test(auto.std.price, auto.turbo.price)
 
-auto.rwd.price = auto.df[auto$drive.wheels=="rwd",]$price
-auto.fwd.price = auto.df[auto$drive.wheels == "fwd",]$price
+auto.rwd.price = auto[auto$drive.wheels=="rwd",]$price
+auto.fwd.price = auto[auto$drive.wheels == "fwd",]$price
 plot.t(auto.rwd.price, auto.fwd.price, cols = c("Auto Price: Drive Wheels = Rear","Auto Price: Drive Wheels = Front"))
 t.test(auto.rwd.price, auto.fwd.price)
 
@@ -101,7 +101,7 @@ t.test(auto.rwd.price, auto.fwd.price)
 # Graphically explore the differences between the price conditioned by the categories of each variable – Hint, make sure you have enough data for each category.
 # Use standard ANOVA and Tukey ANOVA to test the differences of these groups.
 
-auto = read.csv("Automobile price data _Raw_.csv", header = TRUE, stringsAsFactors = FALSE, na.string = "?")
+auto = read.csv("Automobile price data _Raw_.csv", header = TRUE, stringsAsFactors = FALSE)
 numcols = c("price","bore","stroke","horsepower","peak.rpm")
 auto[, numcols] <- lapply(auto[, numcols], as.numeric)
 auto = auto[complete.cases(auto),]
@@ -155,3 +155,12 @@ t.test(auto.twoDoor.price, auto.fourDoor.price)
     t.test(norm1, auto.log.price.scaled, alternative = "two.sided")
     t.test(norm1, auto.price.scaled, alternative = "two.sided")
 #}
+    
+    
+a1 = read.csv("Automobile price data _Raw_.csv", header = TRUE, stringsAsFactors = FALSE)
+a1[, numcols] <- lapply(a1[, numcols], as.numeric)
+a1 = auto[complete.cases(a1),]
+
+a2 = read.csv("Automobile price data _Raw_.csv", header = TRUE, stringsAsFactors = FALSE, na.string = "?")
+a2[, numcols] <- lapply(a2[, numcols], as.numeric)
+a2 = auto[complete.cases(a2),]
