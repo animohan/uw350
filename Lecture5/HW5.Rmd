@@ -1,0 +1,281 @@
+---
+title: "HW5"
+author: "Anish Mohan"
+date: "February 13, 2017"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+Summary of Questions and Answers
+
+Q1.Compare the difference of the bootstrap resampled mean of the log price of autos grouped by 1) aspiration and 2) fuel type. Use both numerical and graphical methods for your comparison. Are these means different within a 95% confidence interval? How do your conclusions compare to the results you obtained using the t-test last week?
+
+Answer 1:     
+    
+  * Auto Price stratified by Aspiration:
+    + Both Bootrap and T-test showed that the mean Auto price for vehicles with different aspiration is different i.e the mean price of the vechicle is dependent on the type of aspiration of the vehicle.
+    
+  * Auto Price stratified by Fuel Type:
+    + Both Bootrap and T-test showed that the mean Auto price for vehicles with different fuel type are not  different i.e the vehicles have the same mean price independent of the fuel type
+
+Q2. Compare the differences of the bootstrap resampled mean of the log price of the autos grouped by body style. You will need to do this pair wise; e.g. between each possible pairing of body styles. Use both numerical and graphical methods for your comparison. Which pairs of means are different within a 95% confidence interval? How do your conclusions compare to the results you obtained from the ANOVA and Tukey's HSD analysis you performed last week?
+
+
+Answer 2:  
+   Auto Price stratified by Body style. 
+   
+
+     
+ * Bootstrap comparisions show that the following body-styles have significantly different price:
+    + Hardtop and Convertible
+    + Hatchback and Convertible
+    + Wagon and Convertible
+    + Sedan and Convertible
+    + Sedan and Hatchback.
+         
+ * Comparing results to Tukey's Honest Significant Difference test, the following pairs do not show up as different in the Bootstrap method:
+    + Hatchback and Hardtop
+    + Sedan and Hardtop
+    + Wagon and Hardtop
+    
+```{r}
+library(HistData)
+library(resample)
+library(simpleboot)
+```
+
+```{r, echo = FALSE}
+#Loading the files
+auto = read.csv("Auto.csv", header = TRUE, stringsAsFactors = FALSE)
+numcols = c("price","bore","stroke","horsepower","peak.rpm")
+auto[, numcols] <- lapply(auto[, numcols], as.numeric)
+auto = auto[complete.cases(auto),]
+
+```
+
+
+##Question 1. Bootstrap for price of Autos stratified by aspiration and fuel type
+
+Compare the difference of the bootstrap resampled mean of the log price of autos grouped by 1) aspiration and 2) fuel type. Use both numerical and graphical methods for your comparison. Are these means different within a 95% confidence interval? 
+
+How do your conclusions compare to the results you obtained using the t-test last week?
+
+
+```{r}
+# Multi-Histogram Plotting function along with the 95% confidence lines
+plot.hist = function(a, b, cols = c("Population A","Population B"), nbins = 80, p = 0.05 ){
+  dat = c(a,b)
+  maxs = max(dat, na.rm = TRUE)
+  mins = min(dat, na.rm = TRUE)
+  breaks = seq(maxs, mins, length.out = (nbins+1))
+  par(mfrow = c(2,1))
+  hist(a, breaks = breaks, main = paste("Histogram of ", cols[1]), xlab  = cols[1])
+  abline(v = mean(a), lwd = 4, col = "red")
+  
+  if(p!=0){
+    abline(v = quantile(a, probs = p/2), lty = 3, col = "red", lwd = 3)
+    abline(v = quantile(a, probs = (1-p/2)), lty = 3, col = "red", lwd = 3)
+  }
+  
+  hist(b, breaks = breaks, main = paste("Histogram of ", cols[2]),  xlab = cols[2])
+  abline(v = mean(b), lwd = 4, col = "red")
+  if(p!=0){
+    abline(v = quantile(b, probs = p/2), lty = 3, col = "red", lwd = 3)
+    abline(v = quantile(b, probs = (1-p/2)), lty = 3, col = "red", lwd = 3)
+  }
+}
+
+
+plot.hist2 = function(a, cols = c("Population A"), nbins = 80, p = 0.05 ){
+  dat = c(a)
+  maxs = max(dat, na.rm = TRUE)
+  mins = min(dat, na.rm = TRUE)
+  breaks = seq(maxs, mins, length.out = (nbins+1))
+  par(mfrow = c(1,1))
+  hist(a, breaks = breaks, main = paste("Histogram of ", cols[1]), xlab  = cols[1])
+  abline(v = mean(a), lwd = 4, col = "red")
+  
+  if(p!=0){
+    abline(v = quantile(a, probs = p/2), lty = 3, col = "red", lwd = 3)
+    abline(v = quantile(a, probs = (1-p/2)), lty = 3, col = "red", lwd = 3)
+  }
+}
+```
+   
+
+### Comparing the Log(Price) of Auto stratified by Aspiration: Turbo and Standard
+
+
+```{r}
+#Comparing  Log(Price) v.s Aspiration
+auto.turbo.log.price = (auto[auto$aspiration=="turbo",]$price)
+auto.std.log.price = (auto[auto$aspiration == "std",]$price)
+plot.hist(auto.turbo.log.price, auto.std.log.price, c(" Auto Price: Aspiration = Turbo", "Auto Price: Aspiration = Std"), p = 0)
+
+#T-test
+t.test(auto.turbo.log.price, auto.std.log.price, alternative = "two.sided")
+
+```
+   
+   
+The t-test shows that the p-value = 0.0036 which is smaller than the significance leve of 0.05. Hence we can reject the null hypothesis that the mean of the Auto price is same for Autos with Turbo and Std aspriation. Hence the mean values for these two classes of the autos are different.     
+
+
+### Bootstrap for Auto Price on Aspiration
+
+```{r}
+#Bootstrap
+mean.boot.auto.turbo.price = one.boot(auto.turbo.log.price, mean, R = 100000)
+mean.boot.auto.std.price = one.boot(auto.std.log.price, mean, R = 100000)
+plot.hist(mean.boot.auto.turbo.price$t, mean.boot.auto.std.price$t, c(" Bootstrapping Auto Price: Aspiration = Turbo", " Bootstrapping Auto Price: Aspiration = Std "))
+
+print(paste0("Mean value of Auto Price with Aspiration = Turbo given by Bootstrap: $",mean.boot.auto.turbo.price$t0))
+print(paste0("Mean value of Auto Price with Aspiration = Std given by Bootstrap: $",mean.boot.auto.std.price$t0))
+```
+
+Bootrapped values show that the 95% interval for bootstrapped values of the mean do not overlap hence we can conclude that the mean Auto price for vehicles with different aspiration is different
+
+
+### Comparing the Log(Price) of Auto stratified by Fuel Typ: Gas and Diesel
+
+```{r}
+#Comparing  Log(Price) vs. Fuel Type
+auto.gas.log.price = (auto[auto$fuel.type=="gas",]$price)
+auto.diesel.log.price = (auto[auto$fuel.type == "diesel",]$price)
+plot.hist(auto.gas.log.price, auto.diesel.log.price, c(" Auto Price: Fuel Type = Gas", "Auto Price: Fuel Type = Diesel "), p = 0)
+```
+
+
+```{r}
+#T-test
+t.test(auto.gas.log.price, auto.diesel.log.price, alternative = "two.sided")
+```
+   
+The p-value for the t-test is 0.1297 which is less than the significance value of 0.05, hence we cannot reject the null hypotheses. Hence with the t-test we can conclude that mean value of price of a gas and diesel vehicle are similar  
+      
+### Bootstrap for Auto Price on Fueltype
+
+```{r}
+#Bootstrap
+mean.boot.auto.gas.price = one.boot(auto.gas.log.price, mean, R = 100000)
+mean.boot.auto.diesel.price = one.boot(auto.diesel.log.price, mean, R = 100000)
+plot.hist(mean.boot.auto.gas.price$t, mean.boot.auto.diesel.price$t, c(" Bootstrapping Auto Price: Fuel Type = Gas", " Bootstrapping Auto Price: Fuel Type = Diesel "))
+
+print(paste0("Mean value of Auto Price with fuel = Gas given by Bootstrap: $",mean.boot.auto.gas.price$t0))
+print(paste0("Mean value of Auto Price with fuel = Diesel given by Bootstrap: $",mean.boot.auto.diesel.price$t0))
+```
+
+Bootrapped values show that the 95% interval for bootstrapped values of the mean overlap hence we can conclude that the mean Auto price for vehicles with different fuel type are not different
+
+##Question 2. Bootstrap for price of Autos stratified by Body style
+
+### Analysis of Variance for price of Autos stratified by Body style
+```{r}
+# Analysis of variance
+boxplot(price~body.style, data = auto)
+auto.body.aov = aov(price ~ as.factor(body.style), data = auto)
+summary(auto.body.aov)
+print(auto.body.aov)
+```
+
+The Analysis of Variance based on body.style gives a p-value of < 1.11e-06, hence we can reject the null-hypotheses and specify that there are significant differences in price dependent on the body style
+
+### Tukey's Honest Significant Difference test for price of Autos stratified by Body style
+
+```{r}
+tukey.body.anova = TukeyHSD(auto.body.aov)
+tukey.body.anova
+plot(tukey.body.anova)
+```
+
+ 
+Some p-values are low indicating significant differences in the price dependent on the body style Following pairs have significanly different prices:
+
+  * Hatchback and Convertible
+  * Wagon and Convertible
+  * Hatchback and Hardtop
+  * Sedan and Hardtop
+  * Wagon and Hardtop
+  * Sedan and Hatchback.
+
+
+
+```{r}
+auto.convertible.price = log(auto[auto$body.style =="convertible",]$price)
+auto.hardtop.price = log(auto[auto$body.style =="hardtop",]$price)
+auto.hatchback.price = log(auto[auto$body.style =="hatchback",]$price)
+auto.sedan.price = log(auto[auto$body.style =="sedan",]$price)
+auto.wagon.price = log(auto[auto$body.style =="wagon",]$price)
+```
+
+##Bootstrap for price of Autos stratified by Body style
+
+```{r, cache = TRUE}
+mean.twoboot.auto.convertible.hardtop = two.boot(auto.convertible.price, auto.hardtop.price,mean, R = 100000)
+mean.twoboot.auto.convertible.hatchback =two.boot(auto.convertible.price, auto.hatchback.price, mean, R = 100000)
+mean.twoboot.auto.convertible.sedan = two.boot(auto.convertible.price, auto.sedan.price,mean, R = 100000)
+mean.twoboot.auto.convertible.wagon = two.boot(auto.convertible.price, auto.wagon.price,mean, R = 100000)
+
+mean.twoboot.auto.hatchback.hardtop = two.boot(auto.hatchback.price, auto.hardtop.price,mean, R = 100000)
+mean.twoboot.auto.sedan.hardtop = two.boot(auto.sedan.price, auto.hardtop.price,mean, R = 100000)
+mean.twoboot.auto.wagon.hardtop = two.boot(auto.wagon.price, auto.hardtop.price,mean, R = 100000)
+
+mean.twoboot.auto.hatchback.sedan = two.boot(auto.hatchback.price, auto.sedan.price,mean, R = 100000)
+mean.twoboot.auto.hatchback.wagon = two.boot(auto.hatchback.price, auto.wagon.price,mean, R = 100000)
+
+mean.twoboot.auto.sedan.wagon = two.boot(auto.wagon.price, auto.wagon.price,mean, R = 100000)
+```
+
+```{r}
+#Convertible vs Hardtop
+plot.hist2(mean.twoboot.auto.convertible.hardtop$t, c("Histogram-Difference of Means:Convertible-Hardtop"))
+
+#Convertible vs Hatchback
+plot.hist2(mean.twoboot.auto.convertible.hatchback$t, c("Histogram-Difference of Means:Convertible-Hatchback"))
+
+#Convertible vs Wagon
+plot.hist2(mean.twoboot.auto.convertible.wagon$t, c("Histogram-Difference of Means:Convertible-Wagon"))
+
+#Convertible vs Sedan
+plot.hist2(mean.twoboot.auto.convertible.sedan$t, c("Histogram-Difference of Means:Convertible-Sedan"))
+
+
+#Hardtop vs Hatchback
+plot.hist2(mean.twoboot.auto.hatchback.hardtop$t, c("Histogram-Difference of Means:Hatchback-Hardtop"))
+
+#Hardtop vs Sedan
+plot.hist2(mean.twoboot.auto.sedan.hardtop$t, c("Histogram-Difference of Means:Sedan-Hardtop"))
+
+#Hardtop vs Wagon
+plot.hist2(mean.twoboot.auto.wagon.hardtop$t, c("Histogram-Difference of Means:Wagon-Hardtop"))
+
+#Hatchback vs Sedan
+plot.hist2(mean.twoboot.auto.hatchback.sedan$t, c("Histogram-Difference of Means:Hatchback-Sedan"))
+
+#Hatchback vs Wagon
+plot.hist2(mean.twoboot.auto.hatchback.wagon$t, c("Histogram-Difference of Means:Hatchback-Wagon"))
+
+#Wagon vs Sedan
+plot.hist2(mean.twoboot.auto.sedan.wagon$t, c("Histogram-Difference of Means:Sedan-Wagon"))
+
+```
+
+
+Comparing the  differences in the price dependent on the body style following pairs have significanly different prices
+
+ + Hardtop and Convertible
+ + Hatchback and Convertible
+ + Wagon and Convertible
+ + Sedan and Convertible
+ + Sedan and Hatchback.
+
+Comparing this result with Tukey's HSD the following three comparisions do not show up as significantly different in the Boostram
+
+ + Hatchback and Hardtop
+ + Sedan and Hardtop
+ + Wagon and Hardtop
+  
+
