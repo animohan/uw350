@@ -14,9 +14,16 @@ knitr::opts_chunk$set(echo = TRUE)
 1. In the National Driving Statistics, there are many drivers who do not text while driving (p = 0.0)
 
 2. The posterior distribution has a mode at about p = 0.15 indicating that about 15 in 100 drivers are texting at the intersection
-3. For the local driving figure: the 90% HDI is between p of (0.05951877 0.19053347). This is a smaller interval and does not contain p $\approx$ 0; indicating that in this area majority of drivers are texting at intersection
-4. For National Driving figure: the 90% HDI is between p of (0.0002985676 0.6751846307). This is a larger interval and contains p $\approx$ 0; indicating that in this area majority of drivers are not texting at intersection
-5. Given tha above data, National Drivers seem to have better driving habits. Additionlly
+
+3. Expected Number of drivers texting at intersection is higher at National level compared to Local drivers
+  + Local Driver: 11.2
+  + National Driver: 19.16
+
+Hence, national drivers seem to be less safer than local drivers.
+
+4. Additionally, here is some more data comparing National and Local driving/texting habits
+    + For the local driving figure: the 90% HDI is between p of (0.05951877 0.19053347). This is a smaller interval and does not contain p $\approx$ 0.
+    + For National Driving figure: the 90% HDI is between p of (0.0002985676 0.6751846307). This is a larger interval but also contains p $\approx$ 0
     + For the National drivers: Out of next 100 drivers, there is 90% chance that the actual number of drivers texting while at intersection is between 0-55
     + For the local driving: Out of next 100 drivers, there is 90% chance that the actual number of drivers texting while at intersection is between 4-20
 
@@ -103,9 +110,13 @@ discint(cbind(s, pred.probs),0.90)
 interval = discint(cbind(s, pred.probs),0.90)$set
 abline(v = interval[1], lty = 3, col = "red", lwd = 3)
 abline(v = interval[length(interval)], lty = 3, col = "red", lwd = 3)
+expected.crashes = sum(pred.probs*s)
+expected.crashes
 ```
 
 For the local driving: Out of next 100 drivers, there is 90% chance that the actual number of drivers texting while at intersection is beteen 4-20
+
+Expected Number of people texting at intersection : 11.925
 
 ```{r}
 #Are the drivers in this area better or worse that the national figures indicate?
@@ -118,6 +129,12 @@ discint(cbind(s, pred.probs.national),0.90)
 interval = discint(cbind(s, pred.probs.national),0.90)$set
 abline(v = interval[1], lty = 3, col = "red", lwd = 3)
 abline(v = interval[length(interval)], lty = 3, col = "red", lwd = 3)
+expected.crashes.national = sum(pred.probs.national*s)
+expected.crashes.national
 ```
 
 For the National drivers: Out of next 100 drivers, there is 90% chance that the actual number of drivers texting while at intersection is beteen 0-55
+
+Expected Number of people texting at intersection : 19.16
+
+More national drivers seem to be texting at intersection compared to local drivers.
