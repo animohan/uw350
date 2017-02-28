@@ -72,8 +72,8 @@ s = 0:n
 pred.probs.national = pbetap(beta.prior, n, s)
 plot(s, pred.probs.national, type = "h",
      main = "Probability distribution of # of accidents in 100 National drivers", xlab = "# of Accidents")
-discint(cbind(s, pred.probs.national),0.50)
-interval = discint(cbind(s, pred.probs.national),0.50)$set
+discint(cbind(s, pred.probs.national),0.90)
+interval = discint(cbind(s, pred.probs.national),0.90)$set
 abline(v = interval[1], lty = 3, col = "red", lwd = 3)
 abline(v = interval[length(interval)], lty = 3, col = "red", lwd = 3)
-mean(pred.probs)
+mean(pred.probs.national)

@@ -25,3 +25,14 @@ lm.step = stepAIC(lm.males, direction = "both")
 lm.step$anova
 summary(lm.step)
 plot(lm.step)
+
+
+#Categorical variables;
+Galton.scaled = GaltonFamilies[, c('mother', 'father', 'childHeight', 'gender')]
+Galton.scaled = mutate(Galton.scaled, 
+                       mother.sqr = mother^2, father.sqr = father^2)
+Galton.scaled[, c('mother', 'father', 'mother.sqr', 'father.sqr')] = 
+  lapply(Galton.scaled[, c('mother', 'father', 'mother.sqr', 'father.sqr')], 
+         scale)
+str(Galton.scaled)
+mod.mat = model.matrix(childHeight ~ ., data = Galton.scaled)
