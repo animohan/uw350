@@ -10,7 +10,7 @@ dim(auto)
 auto[complete.cases(auto),]
 
 #Run linear regression
-lm.auto = lm(price ~., data = auto)
+lm.auto = lm(log(price) ~., data = auto)
 summary(lm.auto)
 plot(lm.auto)
 

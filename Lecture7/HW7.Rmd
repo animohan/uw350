@@ -4,27 +4,47 @@ author: "Anish Mohan"
 date: "February 25, 2017"
 output: html_document
 ---
-
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
 ```
 
-## R Markdown
 
-This is an R Markdown document. Markdown is a simple formatting syntax for authoring HTML, PDF, and MS Word documents. For more details on using R Markdown see <http://rmarkdown.rstudio.com>.
+### Summary
+1.
+2.
+3. 
+4. 
+5. 
 
-When you click the **Knit** button a document will be generated that includes both content as well as the output of any embedded R code chunks within the document. You can embed an R code chunk like this:
 
-```{r cars}
-summary(cars)
+### Stepwise Regression
+```{r}
+auto = read.csv("Auto.csv", header = TRUE, stringsAsFactors = FALSE)
+numcols = c("price","bore","stroke","horsepower","peak.rpm")
+auto[,numcols] = lapply(auto[,numcols], as.numeric)
+auto = data.frame(auto)
+dim(auto)
+auto = subset(auto, select = -c(symboling,normalized.losses))
+dim(auto)
+auto[complete.cases(auto),]
+
+#Run linear regression
+lm.auto = lm(log(price) ~., data = auto)
+summary(lm.auto)
+plot(lm.auto)
+
+
+lm.auto.aic = stepAIC(lm.auto, direction = "both")
+lm.auto.aic$anova
+summary(lm.auto.aic)
+plot(lm.auto.aic)
+
+
 ```
 
-## Including Plots
 
-You can also embed plots, for example:
 
-```{r pressure, echo=FALSE}
-plot(pressure)
-```
+### SVD Regression
 
-Note that the `echo = FALSE` parameter was added to the code chunk to prevent printing of the R code that generated the plot.
+
+### Elastic Net Regression
