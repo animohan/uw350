@@ -10,41 +10,271 @@ knitr::opts_chunk$set(echo = TRUE)
 
 
 ### Summary
-1.
-2.
-3. 
-4. 
-5. 
-
+1. Stepwise Linear regression had the best results with Adj RSquare of 97% and Residual Error of about 0.011. Linear Regerssion and Elastic Net followed in lower training error rate. SVD regression had the worst performance with Adj R2 = 10% and Residual Error of about 1.0
+2. Linear Regression:
+    - Some variables have high predictive value for price E.g Width, Height
+    - Some categorical variables have high predictive value. E.g bmw has a good predictive value for its price, hatch back style vehicles have good predicitve value. Similary Engine location and wheel base are also good predicitve variables for price.
+    - Adj RSquare was about .96 specifying the linear model can specify about 96% variance in the data.
+    - Low Residual Stand Error about 0.011
+3. Stepwise Regression:
+    - For the stepwise regression, following variable were eliminated as having lower predicitve power as measured by its impact on AIC:Stroke, Peak RPM, Horsepower, enginel location and fuel type
+    - Adjusted R is 97% specifying that the model is able to specify 97% of the variance in the data. That is a significantly high value.
+    - Low Residual Standard error of about .011
+  
+4. SVD Regression:
+    - Diagnal values of the SVD fall off exponentially and after first 20 values, rest are very low values in the diagonal
+    - RMSE Errors go down as we add more diagnoal values.
+    - Adj R Square has poor values specifying the model is about to explain about 10-15% of the variance
+5. Ridge + Lasso Regression:
+    - Many coefficients were pushed to zero with the higher lambda values. 
+    - Histogram of residuals is centered at zero implying many variable were predicted correctly
+    - Lower values of the price seem to have more error assciated with them.
+    - Adj R Square is around 52% specifying that 52% of variance can be specified by the model
 
 ### Stepwise Regression
 ```{r}
-auto = read.csv("Auto.csv", header = TRUE, stringsAsFactors = FALSE)
-numcols = c("price","bore","stroke","horsepower","peak.rpm")
-auto[,numcols] = lapply(auto[,numcols], as.numeric)
-auto = data.frame(auto)
-dim(auto)
-auto = subset(auto, select = -c(symboling,normalized.losses))
-dim(auto)
-auto[complete.cases(auto),]
-
-#Run linear regression
-lm.auto = lm(log(price) ~., data = auto)
-summary(lm.auto)
-plot(lm.auto)
-
-
-lm.auto.aic = stepAIC(lm.auto, direction = "both")
-lm.auto.aic$anova
-summary(lm.auto.aic)
-plot(lm.auto.aic)
-
+  library(MASS)
+  
+  #Read and clean Auto values
+  auto = read.csv("Auto.csv", header = TRUE, stringsAsFactors = FALSE, na.strings  = "?")
+  
+  #Specify colument that should be treated as numeric
+  numcols = c("price","bore","stroke","horsepower","peak.rpm")
+  auto[,numcols] = lapply(auto[,numcols], as.numeric)
+  auto = data.frame(auto)
+  
+  #Remove two specific colument
+  auto = subset(auto, select = -c(symboling,normalized.losses))
+  
+  #auto[complete.cases(auto),]
+  auto = na.omit(auto)
+  
+  auto$price = log(auto$price)
+  #Run linear regression
+  lm.auto = lm(log(price) ~., data = auto)
+  summary(lm.auto)
+  plot(lm.auto)
+  
+  lm.predict = predict(lm.auto, newdata = auto)
 
 ```
+#### Notes for Linear Regression
+* Linear Regression results show the following:
+  - Some variables have high predictive value for price E.g Width, Height
+  - Some categorical variables have high predictive value. E.g bmw has a good predictive value for its price, hatch back style vehicles have good predicitve value. Similary Engine location and wheel base are also good predicitve variables for price.
+* Adjusted R Square is about 96% specifying the model is able to explain about 96% of the variance.
+* Low RSE of 0.011
 
+```{r}
+  #Run backwards and forward Stepwise regression considering all the parameters.
+  lm.auto.aic = stepAIC(lm.auto, direction = "both")
+  lm.auto.aic$anova
+  summary(lm.auto.aic)
+  plot(lm.auto.aic)
+```
+
+#### Notes for Stepwise Regression
+* For the stepwise regression, following variable were eliminated as having lower predicitve power as measured by its impact on AIC:Stroke, Peak RPM, Horsepower, enginel location and fuel type
+* Adjusted R is 97% specifying that the model is able to specify 97% of the variance in the data. That is a significantly high value.
+* Low Residual error of 0.011
+  
 
 
 ### SVD Regression
+```{r}
+#Loading required function
+require(ggplot2)
+require(gridExtra)
+
+#The plot function for SVD Regression:
+plot.svd.reg <- function(df, k = 23){
+
+  p1 <- ggplot(df) + 
+            geom_point(aes(score, resids), size = 2) + 
+            stat_smooth(aes(score, resids)) +
+            ggtitle('Residuals vs. fitted values')
+ 
+  p2 <- ggplot(df, aes(resids)) +
+           geom_histogram(aes(y = ..density..)) +
+           geom_density(color = 'red', fill = 'red', alpha = 0.2) +
+           ggtitle('Histogram of residuals')
+
+  qqnorm(df$resids)
+    
+  grid.arrange(p1, p2, ncol = 2)
+    
+  df$std.resids = sqrt((df$resids - mean(df$resids))^2)  
+    
+  p3 = ggplot(df) + 
+            geom_point(aes(score, std.resids), size = 2) + 
+            stat_smooth(aes(score, std.resids)) +
+            ggtitle('Standardized residuals vs. fitted values')
+  print(p3) 
+  
+  n = nrow(df)
+  Ybar = mean(df$price)
+  SST <- sum((df$price - Ybar)^2)
+  SSR <- sum(df$resids * df$resids)
+  SSE = SST - SSR
+  RMSE = sqrt(SSR/(n-2))
+  cat(paste('SSE =', as.character(SSE), '\n'))
+  cat(paste('SSR =', as.character(SSR), '\n'))
+  cat(paste('SST =', as.character(SSE + SSR), '\n'))
+  
+  cat(paste('RMSE =', as.character(RMSE), '\n'))
+  adjR2  <- 1.0 - (SSR/SST) * ((n - 1)/(n - k - 1))
+  cat(paste('Adjusted R^2 =', as.character(adjR2)), '\n')
+}
+
+
+#Reading the files from auto; Strings are takens as factors ehre
+auto = read.csv("Auto.csv", header = TRUE, stringsAsFactors = TRUE)
+
+#Marking specific columns as numeric
+numcols = c("price","bore","stroke","horsepower","peak.rpm")
+auto[,numcols] = lapply(auto[,numcols], as.numeric)
+
+#Marking as data frame and removing specific columns
+auto = data.frame(auto)
+auto = subset(auto, select = -c(symboling,normalized.losses))
+
+#Removing data with NA
+auto = na.omit(auto)
+auto$price = log(auto$price)
+
+#cols = c("make","fuel.type","aspiration","num.of.doors","body.style","drive.wheels","engine.location", "engine.type","num.of.cylinders", "fuel.system")
+
+#Selecting columns for applying scaling
+cols = c("wheel.base","length","width","height","curb.weight","engine.size","bore","stroke","compression.ratio","horsepower","peak.rpm","city.mpg","highway.mpg","price")
+auto.scale = auto
+auto.scale[,cols] = lapply(auto[,cols],scale)
+auto.modmat = model.matrix(price~., data = auto.scale)
+
+#Calculating M(Square) matrix
+M = auto.modmat[,-1]
+M2 = t(M)%*%M
+
+
+#Calcualting the SVD for the matrix
+mSVD = svd(M2)
+
+# Plotting the values of the Diagonal entires of the SVD
+plot(mSVD$d, xlab = "Row/Column of the M2 matrix", ylab = "Values in diagonal")
+len = length(mSVD$d)
+#Calculaing the inverser of the SVD matrix
+inv.diag = rep(0,len)
+
+#Selecting different number of diagnoal values to compare plots
+RMSE = c()
+
+for(i in seq(1,25)){
+    inv.diag[1:1] = 1/mSVD$d[1:1]
+    mD = diag(inv.diag)
+    
+    #Inverse (t(M)*M) = V Diag U
+    mInV = mSVD$v %*% mD %*% t(mSVD$u)
+    
+    b = auto.scale$price
+    #x = Inv(MTM)*t(M)*b
+    x = mInV %*% t(M) %*% b
+    
+    #Calculaing the predicted value and residuals
+    auto.cp = auto
+    auto.cp$score =  (M %*% x)*sd(auto.cp$price) + mean(auto.cp$price)
+    auto.cp$resids =  auto.cp$score - auto.cp$price
+    
+    n = nrow(auto.cp)
+    rms = sqrt(sum(auto.cp$resids^2)/(n-2))
+    RMSE = c(RMSE, rms)
+   
+    #require(repr)
+    #options(repr.pmales.extlot.width=8, repr.plot.height=4)
+    if( i%%5 == 0){
+      plot.svd.reg(auto.cp)
+    }
+}
+ plot(RMSE)
+```
+
+
+#### Notes on SVD Regression
+* Diagnoal values of the SVD fall off exponentially and after first 20 values, rest are very low values in the diagonal
+* RMSE Errors go down as we add more diagnoal values.
+* Adj R Square has poor values specifying the model is about to explain about 10-15% of the variance
+
+
+
 
 
 ### Elastic Net Regression
+
+
+```{r}
+#Plotting function for elastitc net
+plot.elastic.reg <- function(df, k = 4){
+  require(ggplot2)
+  require(gridExtra)
+  
+  p1 <- ggplot(df) + 
+            geom_point(aes(score, resids), size = 2) + 
+            stat_smooth(aes(score, resids)) +
+            ggtitle('Residuals vs. fitted values')
+ 
+  p2 <- ggplot(df, aes(resids)) +
+           geom_histogram(aes(y = ..density..)) +
+           geom_density(color = 'red', fill = 'red', alpha = 0.2) +
+           ggtitle('Histogram of residuals')
+
+  qqnorm(df$resids)
+    
+  grid.arrange(p1, p2, ncol = 2)
+    
+  df$std.resids = sqrt((df$resids - mean(df$resids))^2)  
+    
+  p3 = ggplot(df) + 
+            geom_point(aes(score, std.resids), size = 2) + 
+            stat_smooth(aes(score, std.resids)) +
+            ggtitle('Standardized residuals vs. fitted values')
+  print(p3) 
+    
+  n = nrow(df)
+  Ybar = mean(df$price)
+  SST <- sum((df$price - Ybar)^2)
+  SSR <- sum(df$resids * df$resids)
+  SSE = SST - SSR
+  RMSE = sqrt(SSR/(n-2))
+  cat(paste('SSE =', as.character(SSE), '\n'))
+  cat(paste('SSR =', as.character(SSR), '\n'))
+  cat(paste('SST =', as.character(SSE + SSR), '\n'))
+  cat(paste('RMSE =', as.character(RMSE), '\n'))
+
+  adjR2  <- 1.0 - (SSR/SST) * ((n - 1)/(n - k - 1))
+  cat(paste('Adjusted R^2 =', as.character(adjR2)), '\n')
+}
+
+
+library(glmnet)
+#M = ModelMatrix
+#auto.cp$price = log price
+#Specifying the dependent variable and the features
+M = auto.modmat[,-1]
+b = auto.cp$price
+
+#Runnnign ridge + Lasso
+  mod.ridge.lasso = glmnet(M, b, family = 'gaussian', nlambda = 20, alpha = 0.5)
+ 
+  #Storing the predictions in the Auto data frame
+  auto.cp$score = predict(mod.ridge.lasso, newx = M)[, 15]
+  auto.cp$resids = auto.cp$score - auto.cp$price
+  
+  #Plotting the decay of variables based on lambda value
+  plot(mod.ridge.lasso, xvar = 'lambda', label = TRUE)
+  plot(mod.ridge.lasso, xvar = 'dev', label = TRUE)
+
+  plot.elastic.reg(auto.cp)
+```
+#### Notes
+* Many coefficients were pushed to zero with the higher lambda values. 
+* Histogram of residuals is centered at zero implying many variable were predicted correctly
+* Lower values of the price seem to have more error assciated with them.
+* Adj R Square is around 52% specifying that 52% of variance can be specified by the model
