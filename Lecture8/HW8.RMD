@@ -1,9 +1,31 @@
+---
+title: "Hw8"
+author: "Anish Mohan"
+date: "March 8, 2017"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+##Summary
+1. This file models production of Milk and Ice-Cream from 1995 to 2013.
+2. The time series for milk and Ice cream production is not stationery.
+3. There is significant seasonal component in the production of Ice cream and Milk
+4. The best order of ARMA(p,q) is with p = 1 and q = 1
+5. As the time moves into future confidence intervals are more wider.
+
+## Modeling Milk Production
+
+```{r}
+#Reading the data
 ca = read.csv("CADairyProduction.csv", stringsAsFactors = FALSE)
 ca = na.omit(ca)
 summary(ca)
 str(ca)
 milk.ts = ts(ca[,5], start = 1995, frequency = 12)
 
+#ACF function
 plot.acf <- function(df, col = 'remainder', is.df =TRUE){
   if(is.df) temp <- df[, col]
   else temp <- df
@@ -13,7 +35,8 @@ plot.acf <- function(df, col = 'remainder', is.df =TRUE){
   par(mfrow = c(1,1))
 }
 
-ts.decomp <- function(df, col = 'elec.ts', span = 0.5, Mult = TRUE, is.df = TRUE){
+#Decompositon function
+ts.decomp <- function(df, col = 'milk.ts', span = 0.5, Mult = TRUE, is.df = TRUE){
   # if(Mult) temp = log(df[, col])  else temp = ts(df[, col]
   if(is.df) temp = log(df[, col])  
   else temp = df
@@ -23,6 +46,7 @@ ts.decomp <- function(df, col = 'elec.ts', span = 0.5, Mult = TRUE, is.df = TRUE
   fit$time.series
 }
 
+#Decomposition.
 milk.decomp = ts.decomp(milk.ts, Mult = TRUE, is.df = FALSE, span = 0.5)
 options(repr.pmales.extlot.width=8, repr.plot.height=6)
 plot.acf(milk.decomp[, 3], is.df = FALSE)
@@ -34,6 +58,7 @@ ts.model = function(ts, col = 'remainder', order = c(0,0,1)){
   mod
 }
 
+#Trying different values of parameters.
 milk.arima = ts.model(milk.decomp[, 3], col = 'ARIMA model for Milk Order', order = c(1,1,1))
 milk.arima = ts.model(milk.decomp[, 3], col = 'ARIMA model for Milk Order', order = c(2,1,1))
 milk.arima = ts.model(milk.decomp[, 3], col = 'ARIMA model for Milk Order', order = c(1,2,1))
@@ -42,6 +67,7 @@ milk.arima = ts.model(milk.decomp[, 3], col = 'ARIMA model for Milk Order', orde
 milk.arima = ts.model(milk.decomp[, 3], col = 'ARIMA model for Milk Order', order = c(1,4,1))
 
 
+#Forecasting the milk production
 require(forecast)
 fit.elect = auto.arima(milk.ts, max.p=3, max.q=3,
                        max.P=2, max.Q=2, max.order=5, max.d=2, max.D=1,
@@ -51,17 +77,18 @@ summary(fit.elect)
 milk.forecast = forecast(fit.elect, h=12)
 summary(milk.forecast)
 plot(milk.forecast, xlab = "Year", ylab = "Milk Production")
+```
 
+## Modeling Ice-Cream Production
 
-#ICE CREAM
+```{r}
+#Reading the ice-cream production data.
 ice.ts = ts(ca[,4], start = 1995, frequency = 12)
-
 ice.decomp = ts.decomp(ice.ts, Mult = TRUE, is.df = FALSE, span = 0.5)
 options(repr.pmales.extlot.width=8, repr.plot.height=6)
 plot.acf(ice.decomp[, 3], is.df = FALSE)
 
 #Arima model
-
 ice.arima = ts.model(ice.decomp[, 3], col = 'ARIMA model for Ice-Cream Order', order = c(1,1,1))
 ice.arima = ts.model(ice.decomp[, 3], col = 'ARIMA model for Ice-Cream Order', order = c(2,1,1))
 ice.arima = ts.model(ice.decomp[, 3], col = 'ARIMA model for Ice-Cream Order', order = c(1,2,1))
@@ -76,6 +103,10 @@ fit.elect = auto.arima(ice.ts, max.p=3, max.q=3,
                        start.p=0, start.q=0, start.P=0, start.Q=0)
 summary(fit.elect)
 
+#Forecasting for ice-cream production
 ice.forecast = forecast(fit.elect, h=12)
 summary(ice.forecast)
 plot(ice.forecast, xlab = "Year", ylab = "Ice-Cream Production")
+```
+
+
