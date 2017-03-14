@@ -1,0 +1,34 @@
+#[1] "Id"            "MSSubClass"    "MSZoning"      "LotFrontage"   "LotArea"       "Street"        "Alley"        
+#[8] "LotShape"      "LandContour"   "Utilities"     "LotConfig"     "LandSlope"     "Neighborhood"  "Condition1"   
+#[15] "Condition2"    "BldgType"      "HouseStyle"    "OverallQual"   "OverallCond"   "YearBuilt"     "YearRemodAdd" 
+#[22] "RoofStyle"     "RoofMatl"      "Exterior1st"   "Exterior2nd"   "MasVnrType"    "MasVnrArea"    "ExterQual"    
+#[29] "ExterCond"     "Foundation"    "BsmtQual"      "BsmtCond"      "BsmtExposure"  "BsmtFinType1"  "BsmtFinSF1"   
+#[36] "BsmtFinType2"  "BsmtFinSF2"    "BsmtUnfSF"     "TotalBsmtSF"   "Heating"       "HeatingQC"     "CentralAir"   
+#[43] "Electrical"    "X1stFlrSF"     "X2ndFlrSF"     "LowQualFinSF"  "GrLivArea"     "BsmtFullBath"  "BsmtHalfBath" 
+#[50] "FullBath"      "HalfBath"      "BedroomAbvGr"  "KitchenAbvGr"  "KitchenQual"   "TotRmsAbvGrd"  "Functional"   
+#[57] "Fireplaces"    "FireplaceQu"   "GarageType"    "GarageYrBlt"   "GarageFinish"  "GarageCars"    "GarageArea"   
+#[64] "GarageQual"    "GarageCond"    "PavedDrive"    "WoodDeckSF"    "OpenPorchSF"   "EnclosedPorch" "X3SsnPorch"   
+#[71] "ScreenPorch"   "PoolArea"      "PoolQC"        "Fence"         "MiscFeature"   "MiscVal"       "MoSold"       
+#3[78] "YrSold"        "SaleType"      "SaleCondition" "SalePrice" 
+
+
+("MSSubClass","LotFrontage","LotArea","OverallQual","OverallCond",
+                      "MasVnrArea","BsmtFinSF1","BsmtFinSF2","BsmtUnfSF","TotalBsmtSF",
+                     "X1stFlrSF","X2ndFlrSF","LowQualFinSF","GrLivArea","BsmtFullBath",
+                     "BsmtHalfBath","FullBath","HalfBath","BedroomAbvGr","KitchenAbvGr",
+                     "TotRmsAbvGrd","Fireplaces","GarageYrBlt","GarageCars","GarageArea",
+                     "WoodDeckSF","OpenPorchSF","EnclosedPorch","X3SsnPorch","PoolArea",
+                     "MiscVal","MoSold","YrSold","SalePrice","LotArea")]
+
+
+Categorical Variable
+#[1] "Id"    "MSZoning"   "Street"        "Alley"        
+#[8] "LotShape"      "LandContour"   "Utilities"     "LotConfig"     "LandSlope"     "Neighborhood"  "Condition1"   
+#[15] "Condition2"    "BldgType"      "HouseStyle"   "YearBuilt"     "YearRemodAdd" 
+#[22] "RoofStyle"     "RoofMatl"      "Exterior1st"   "Exterior2nd"   "MasVnrType"    "ExterQual"    
+#[29] "ExterCond"     "Foundation"    "BsmtQual"      "BsmtCond"      "BsmtExposure"  "BsmtFinType1"   
+#[36] "BsmtFinType2"    "Heating"       "HeatingQC"     "CentralAir"   
+#[43] "Electrical"     "KitchenQual" "Functional"   
+ "FireplaceQu"   "GarageType"    "GarageFinish"   
+#[64] "GarageQual"    "GarageCond"    "PavedDrive"   
+#[71] "ScreenPorch"    "PoolQC"        "Fence"         "MiscFeature"   "SaleType"      "SaleCondition" "SalePrice" d
