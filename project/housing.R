@@ -320,12 +320,64 @@ ggplot(house, aes(y = SalePrice, x = log(LotArea))) + geom_point(aes(color= fact
 ggplot(house, aes(y = SalePrice, x = log(LotArea))) + geom_point(aes(color= factor(LandContour))) + xlab("Lot Area") + ylab("Sale Price") + ggtitle("Relationship between Lot Area and Sale Price") #outliers
 ggplot(house, aes(y = SalePrice, x = log(LotArea))) + geom_point(aes(color= factor(BldgType))) + xlab("Lot Area") + ylab("Sale Price") + ggtitle("Relationship between Lot Area and Sale Price")
 
+ggplot(house, aes(y = SalePrice, x = (X1stFlrSF))) + geom_point(aes(color= factor(MSZoning))) + xlab("Lot Area") + ylab("Sale Price") + ggtitle("Relationship between Lot Area and Sale Price")
+ggplot(house, aes(y = SalePrice, x = (X1stFlrSF))) + geom_point(aes(color= factor(HouseStyle))) + xlab("Lot Area") + ylab("Sale Price") + ggtitle("Relationship between Lot Area and Sale Price")
+ggplot(house, aes(y = SalePrice, x = (X1stFlrSF))) + geom_point(aes(color= factor(BldgType))) + xlab("Lot Area") + ylab("Sale Price") + ggtitle("Relationship between Lot Area and Sale Price")
+ggplot(house, aes(y = SalePrice, x = (X1stFlrSF))) + geom_point(aes(color= factor(YearBuilt))) + xlab("Lot Area") + ylab("Sale Price") + ggtitle("Relationship between Lot Area and Sale Price")
+ggplot(house, aes(y = SalePrice, x = (X1stFlrSF))) + geom_point(aes(color= factor(FullBath))) + xlab("Lot Area") + ylab("Sale Price") + ggtitle("Relationship between Lot Area and Sale Price")
+ggplot(house, aes(y = SalePrice, x = (X1stFlrSF))) + geom_point(aes(color= factor(HalfBath))) + xlab("Lot Area") + ylab("Sale Price") + ggtitle("Relationship between Lot Area and Sale Price")
+ggplot(house, aes(y = SalePrice, x = (X1stFlrSF))) + geom_point(aes(color= factor(GarageCars))) + xlab("Lot Area") + ylab("Sale Price") + ggtitle("Relationship between Lot Area and Sale Price")
+ggplot(house, aes(y = SalePrice, x = (X1stFlrSF))) + geom_point(aes(color= factor(Foundation))) + xlab("Lot Area") + ylab("Sale Price") + ggtitle("Relationship between Lot Area and Sale Price")
 
-ggplot(house, aes(y = SalePrice, x = log(TotalBsmtSF))) + geom_point(aes(color= factor(BsmtQual))) + xlab("Lot Area") + ylab("Sale Price") + ggtitle("Relationship between Lot Area and Sale Price")
-ggplot(house, aes(y = SalePrice, x = log(TotalBsmtSF))) + geom_point(aes(color= factor(BsmtFinType1))) + xlab("Lot Area") + ylab("Sale Price") + ggtitle("Relationship between Lot Area and Sale Price")
 
-ggplot(house, aes(y = SalePrice, x = (CentralAir))) + geom_point(aes(color= factor(BsmtFinType2))) + xlab("Lot Area") + ylab("Sale Price") + ggtitle("Relationship between Lot Area and Sale Price")
 
+ggplot(house, aes(y = SalePrice, x = (GrLivArea))) + geom_point(aes(color= factor(MSZoning))) + xlab("Lot Area") + ylab("Sale Price") + ggtitle("Relationship between Lot Area and Sale Price")
+ggplot(house, aes(y = SalePrice, x = (GrLivArea))) + geom_point(aes(color= factor(HouseStyle))) + xlab("Lot Area") + ylab("Sale Price") + ggtitle("Relationship between Lot Area and Sale Price")
+ggplot(house, aes(y = SalePrice, x = (GrLivArea))) + geom_point(aes(color= factor(BldgType))) + xlab("Lot Area") + ylab("Sale Price") + ggtitle("Relationship between Lot Area and Sale Price")
+ggplot(house, aes(y = SalePrice, x = (GrLivArea))) + geom_point(aes(color= factor(YearBuilt))) + xlab("Lot Area") + ylab("Sale Price") + ggtitle("Relationship between Lot Area and Sale Price")
+ggplot(house, aes(y = SalePrice, x = (GrLivArea))) + geom_point(aes(color= factor(FullBath))) + xlab("Lot Area") + ylab("Sale Price") + ggtitle("Relationship between Lot Area and Sale Price")
+ggplot(house, aes(y = SalePrice, x = (GrLivArea))) + geom_point(aes(color= factor(HalfBath))) + xlab("Lot Area") + ylab("Sale Price") + ggtitle("Relationship between Lot Area and Sale Price")
+ggplot(house, aes(y = SalePrice, x = (GrLivArea))) + geom_point(aes(color= factor(GarageCars))) + xlab("Lot Area") + ylab("Sale Price") + ggtitle("Relationship between Lot Area and Sale Price")
+ggplot(house, aes(y = SalePrice, x = (GrLivArea))) + geom_point(aes(color= factor(Foundation))) + xlab("Lot Area") + ylab("Sale Price") + ggtitle("Relationship between Lot Area and Sale Price")
+
+
+ggplot(house, aes(y = SalePrice, x = log(LotArea))) + geom_point(aes(color= factor(BldgType), size = X1stFlrSF+X2ndFlrSF), alpha = 0.7) + xlab("Lot Area") + ylab("Sale Price") + ggtitle("Relationship between Lot Area and Sale Price")
+ggplot(house, aes(y = SalePrice, x = log(LotArea))) + geom_point(aes(color= factor(Foundation), size = X1stFlrSF+X2ndFlrSF), alpha = 0.7) + xlab("Lot Area") + ylab("Sale Price") + ggtitle("Relationship between Lot Area and Sale Price")
+ggplot(house, aes(y = SalePrice, x = log(LotArea))) + geom_point(aes(color= factor(BldgType), size = PoolArea), alpha = 0.9) + xlab("Lot Area") + ylab("Sale Price") + ggtitle("Relationship between Lot Area and Sale Price")
+
+
+ggplot(house, aes(y = SalePrice, x = log(LotArea))) + geom_point(aes(color= factor(BldgType), size = X1stFlrSF+X2ndFlrSF, shape = factor(FullBath)), alpha = 0.9) + xlab("Lot Area") + ylab("Sale Price") + ggtitle("Relationship between Lot Area and Sale Price")
+ggplot(house, aes(y = SalePrice, x = log(LotArea))) + geom_point(aes(color= factor(BldgType), size = PoolArea), alpha = 0.9) + xlab("Lot Area") + ylab("Sale Price") + ggtitle("Relationship between Lot Area and Sale Price")
+
+ggplot(house, aes(y = SalePrice, x = OverallQual)) + geom_point(aes(color= factor(BldgType), size = LotArea), alpha = 0.9) + xlab("Lot Area") + ylab("Sale Price") + ggtitle("Relationship between Lot Area and Sale Price")
+ggplot(house, aes(y = SalePrice, x = OverallQual)) + geom_point(aes(color= factor(HouseStyle), size = LotArea), alpha = 0.9) + xlab("Lot Area") + ylab("Sale Price") + ggtitle("Relationship between Lot Area and Sale Price")
+
+
+#More plots
+options(repr.plot.width=8, repr.plot.height=8)
+require(car)
+scatterplotMatrix(~LotArea + YearBuilt  + TotalBsmtSF + X1stFlrSF + GrLivArea + SalePrice, data = house)
+
+#Plots
+library(ellipse)
+R = cor(house[, c('LotArea','OverallQual',"FullBath","GarageCars", 'YearBuilt', 'TotalBsmtSF', 'X1stFlrSF', 'GrLivArea', 'SalePrice')], method = 'pearson')
+print(R)
+plotcorr(R, col = colorRampPalette(c("firebrick3", "white", "navy"))(10))
+
+options(repr.plot.width=16, repr.plot.height=16)
+R = cor(house[, c("MSSubClass","LotArea","OverallQual","OverallCond",
+                  "TotalBsmtSF","X1stFlrSF","GrLivArea","FullBath","HalfBath","BedroomAbvGr","KitchenAbvGr",
+                  "TotRmsAbvGrd","Fireplaces","GarageCars","GarageArea",
+                  "WoodDeckSF","OpenPorchSF","EnclosedPorch","X3SsnPorch","PoolArea",
+                  "SalePrice","LotArea")], method = 'pearson')
+
+
+
+
+print(R)
+plotcorr(R, col = colorRampPalette(c("firebrick3", "white", "navy"))(10))
+library(corrplot)
+corrplot(R, method="circle", type='lower')
 
 #Regression:
 house$logSalePrice = log(house$SalePrice)
