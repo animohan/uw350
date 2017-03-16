@@ -10,20 +10,19 @@ knitr::opts_chunk$set(echo = TRUE)
 ```
 
 ## Analysing Ames Housing Dataset.
-
 Credit: This data was was obtained from https://ww2.amstat.org/publications/jse/v19n3/decock.pdf and is also available as part of Kaggle Competition: https://www.kaggle.com/c/house-prices-advanced-regression-techniques
 
 
 ### Introduction
-
-
-### Overview and Summary of Results
-
-### Exploratory Data Analysis
-
 The Ames Housing data has many details regarding houses sold and bought in Ames, Iowas between 2006 - 2010. It has details of 81 metrics related to theses houses. The features includes common aspects of house like Area of the Lot, Area of the house, Number of bathrooms etc. It also includes some uncommon aspects like the Masonary Veneer type, 3 Season porch etc. The data contains information about 1451 houses.
 
-About half of the features are Quantitiative variables and the remaining ones are Categorical variables. There are many houses that do not have all the feature information available. Also there are many features or variables which are only available for small number of houses. 
+### Overview and Summary of Results
+In this report we perform some exploratory data analysis on the housing data from Ames,Iowa. One of the key aspects 
+
+
+
+### Exploratory Data Analysis
+In the given data, about half of the features are Quantitiative variables and the remaining ones are Categorical variables. There are many houses that do not have all the feature information available. Also there are many features or variables which are only available for small number of houses. 
 
 In this analysis, we will consider the House Sale Price as the dependent variable and rest of the variables being independent variables.
 
