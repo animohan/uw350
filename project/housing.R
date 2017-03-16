@@ -313,7 +313,7 @@ ggplot(house, aes(x = factor(PoolQC), y = SalePrice)) + geom_violin(trim = T, dr
 ggplot(house, aes(x = factor(MiscFeature), y = SalePrice)) + geom_violin(trim = T, draw_quantiles = c(0.25,0.5,0.75))
 ggplot(house, aes(x = factor(SaleType), y = SalePrice)) + geom_violin(trim = T, draw_quantiles = c(0.25,0.5,0.75)) #Look
 ggplot(house, aes(x = factor(SaleCondition), y = SalePrice)) + geom_violin(trim = T, draw_quantiles = c(0.25,0.5,0.75)) #Look
-
+ggplot(house, aes(x = factor(Neighborhood), y = SalePrice)) + geom_violin(trim = T, draw_quantiles = c(0.25,0.5,0.75)) #Look
 
 
 #Hexbins:
@@ -361,6 +361,12 @@ ggplot(house, aes(y = SalePrice, x = log(LotArea))) + geom_point(aes(color= fact
 
 ggplot(house, aes(y = SalePrice, x = OverallQual)) + geom_point(aes(color= factor(BldgType), size = LotArea), alpha = 0.9) + xlab("Lot Area") + ylab("Sale Price") + ggtitle("Relationship between Lot Area and Sale Price")
 ggplot(house, aes(y = SalePrice, x = OverallQual)) + geom_point(aes(color= factor(HouseStyle), size = LotArea), alpha = 0.9) + xlab("Lot Area") + ylab("Sale Price") + ggtitle("Relationship between Lot Area and Sale Price")
+
+ggplot(house, aes(y = SalePrice, x = Neighborhood)) + geom_point(aes(color= factor(OverallQual), size = LotArea), alpha = 0.9) + xlab("Lot Area") + ylab("Sale Price") + ggtitle("Relationship between Lot Area and Sale Price") + 
+  theme(axis.text.x=element_text(angle = -90, hjust = 0))
+
+ggplot(house, aes(y = SalePrice, x = Neighborhood)) + geom_point(aes(color= factor(YearBuilt), size = LotArea), alpha = 0.9) + xlab("Lot Area") + ylab("Sale Price") + ggtitle("Relationship between Lot Area and Sale Price") + 
+  theme(axis.text.x=element_text(angle = -90, hjust = 0))
 
 
 #More plots

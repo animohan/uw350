@@ -6,3 +6,5 @@ car
 ellipse
 corrplot
 repr
+gridExtra
+knitr
