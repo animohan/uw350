@@ -1,0 +1,367 @@
+---
+title: 'Project 350B: Analysing Ames Housing Dataset'
+author: "Anish Mohan"
+date: "March 15, 2017"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## Analysing Ames Housing Dataset.
+
+Credit: This data was was obtained from https://ww2.amstat.org/publications/jse/v19n3/decock.pdf and is also available as part of Kaggle Competition: https://www.kaggle.com/c/house-prices-advanced-regression-techniques
+
+
+### Introduction
+
+
+### Overview and Summary of Results
+
+### Exploratory Data Analysis
+
+The Ames Housing data has many details regarding houses sold and bought in Ames, Iowas between 2006 - 2010. It has details of 81 metrics related to theses houses. The features includes common aspects of house like Area of the Lot, Area of the house, Number of bathrooms etc. It also includes some uncommon aspects like the Masonary Veneer type, 3 Season porch etc. The data contains information about 1451 houses.
+
+About half of the features are Quantitiative variables and the remaining ones are Categorical variables. There are many houses that do not have all the feature information available. Also there are many features or variables which are only available for small number of houses. 
+
+In this analysis, we will consider the House Sale Price as the dependent variable and rest of the variables being independent variables.
+
+```{r}
+#Loading the libraries and the data
+library(ggplot2)
+library(reshape2)
+library(MASS)
+house = read.csv("train.csv", header = TRUE, stringsAsFactors = FALSE)
+house[complete.cases(house),]
+# names(house)
+dim(house)
+# str(house)
+```
+
+Since some variables are only available for small number of houses, for the purpose of the analysis here, I have removed them as they would have significant impact on most of the houses. I do understand the implication here that such variable might be a good predictor for the dependent variable:- House Sale Price
+
+```{r}
+todrop = c("Fence", "MiscFeature","PoolQC","GarageType","GarageQual","GarageCond", "GarageFinish","GarageYrBlt",
+           "FireplaceQu", "BsmtFinType1", "BsmtFinType2", "BsmtExposure","BsmtQual","BsmtCond","Alley","LotFrontage")
+house[,todrop] = NULL
+house = na.omit(house)
+
+house.int = house[,c("MSSubClass","LotArea","OverallQual","OverallCond",
+                      "MasVnrArea","BsmtFinSF1","BsmtFinSF2","BsmtUnfSF","TotalBsmtSF",
+                     "X1stFlrSF","X2ndFlrSF","LowQualFinSF","GrLivArea","BsmtFullBath",
+                     "BsmtHalfBath","FullBath","HalfBath","BedroomAbvGr","KitchenAbvGr",
+                     "TotRmsAbvGrd","Fireplaces","GarageCars","GarageArea",
+                     "WoodDeckSF","OpenPorchSF","EnclosedPorch","X3SsnPorch","PoolArea",
+                     "MiscVal","MoSold","YrSold","SalePrice")]
+```
+
+Summary of the housing data shows some interesting results in the distribution of the features. For e.g
+  + Lot Are of the house has a huge variation and can vary from 1300 Sq Ft to 200,000Sq Ft. The lot area for the some of the houses are smaller than the Basement area of some of the other houses.
+  
+  + There is a subjective measurement of Overall Quality of the house that rates from 1 to Max Quality of 10 with the median about 6. Another subjective measurement is the Overall Condition of the house that varies from 1 to 9 with the median about 5.
+  
+  + Most houses have atleast 1 room. However, some houses are sold even without any bathrooms or half bathrooms.
+  
+  + The Sale price has a huge variance going from about$ 35K to $755K
+
+```{r}
+summary(house.int)
+```
+
+
+#### Analysing Histogram Distributions of data
+
+Histogram of Sale distribution shows a peak around $150K, with a long tail going upto  $750K
+
+```{r}
+ggplot(house, aes(SalePrice)) + geom_histogram(binwidth = 10000) + xlab("SalePrice") + ylab("Counts") + ggtitle(" Histogram of Sale Prices")
+```
+
+
+Histogram of the Quality Ratings shows that most Houses have a quality rating of 5 or 6.
+
+```{r}
+ggplot(house, aes(OverallQual)) + geom_histogram() + xlab("Quality Ratings") + ylab("Counts") + ggtitle(" Histogram of Quality Rating of Houses")
+```
+
+Histogram for the total housing area shows a very broad peak of about 1000-2000 Square feet.
+
+```{r}
+ggplot(house, aes(X1stFlrSF+X2ndFlrSF)) + geom_histogram(binwidth = 100) + xlab("Total Housing Area Square Feet") + ylab("Counts") + ggtitle("Histogram of House Area")
+```
+
+Histogram of Garage distribution shows that most of the sold houses have garage capacity of 2 Cars
+
+```{r}
+ggplot(house, aes(GarageCars)) + geom_histogram() + xlab("Garage Capacity") + ylab("Counts") + ggtitle("Histogram of Garage Capacity")
+```
+
+Similar to Garage Capacity, the distribution of # of full baths show that most houses have 2 baths.
+
+```{r}
+ggplot(house, aes(FullBath)) + geom_histogram() + xlab("# of Full Bath") + ylab("Counts") + ggtitle("Histogram of Full Baths")
+```
+
+Looking at distriubtion of Buidling types, Single Family houses are the most common houses that sold.
+
+```{r}
+ggplot(house, aes(BldgType)) + geom_bar() + xlab("# of Full Bath") + ylab("Counts") + ggtitle("Bar chart of Building Types")
+```
+
+This bar chart shows that  1 and 2 story houses are the most common. In such houses both the 1st and 2nd level of the houses are finished.
+```{r}
+ggplot(house, aes(HouseStyle)) + geom_bar() + xlab("House Style") + ylab("Counts") + ggtitle("Chart of Style of the Houses")
+```
+
+The distribution of the ZOning of the sold houses show that most houses sold are in the Residential Low Density Zones.
+
+```{r}
+ggplot(house, aes(MSZoning)) + geom_bar() + xlab("Zoning Type") + ylab("Counts") + ggtitle("Bar chart of Location Zone of the houses")
+```
+
+#### Analysing Covariance/Correation between variables.
+
+Analysis of co-variance and correlations show that houses built in latter years have higher quality rating. The overall quality rating also seems to be higher when the houses are larger having bigger basement and living areas. Such houses are also sold at higher Sale price.
+
+Sale Price seeems to be impacted by overall the size of the house. Basically, if the house has larger area, it also means that it has larger 1st floor area, Living area and Basement area etc.
+
+```{r}
+options(repr.plot.width=16, repr.plot.height=16)
+require(car)
+scatterplotMatrix(~LotArea + YearBuilt+ OverallQual + TotalBsmtSF + X1stFlrSF + GrLivArea  +SalePrice, data = house)
+```
+
+Second set of factors that seem to impact Sale price is the number of Bedrooms. Bathrooms and higher capacity garages. 
+```{r echo=FALSE}
+scatterplotMatrix(~Fireplaces + GarageCars  + BedroomAbvGr+ KitchenAbvGr  + SalePrice + FullBath+ OverallQual, data = house)
+```
+
+
+#### Correlation Plots
+This correlatin plot shows that there is positive correlation of Overall Quality, Total Basement Area, 1St Floor Area, Greater Living area, Number of full baths, Total Rooms, Number ofFireplaces, Garage Area etc.
+
+There also seems to be correlation on the charactersitcs of the home i.e a home with larger 1st floor area has higher total basement area, living area , garage area etc.
+
+```{r}
+library(ellipse)
+R = cor(house[, c("MSSubClass","LotArea","OverallQual","OverallCond",
+                  "TotalBsmtSF","X1stFlrSF","GrLivArea","FullBath","HalfBath","BedroomAbvGr","KitchenAbvGr","TotRmsAbvGrd","Fireplaces","GarageCars","GarageArea",
+                  "WoodDeckSF","OpenPorchSF","EnclosedPorch","X3SsnPorch","PoolArea",
+                  "SalePrice")], method = 'pearson')
+#print(R)
+options(repr.plot.width=50, repr.plot.height=50)
+Lab.palette <- colorRampPalette(c("red", "orange", "blue"),
+                                space = "Lab")
+
+plotcorr(R, col = Lab.palette(25))
+```
+
+
+This correlatin plot shows that there is positive correlation of Overall Quality, Total Basement Area, 1St Floor Area, Greater Living area, Number of full baths, Total Rooms, Number ofFireplaces, Garage Area etc.
+
+There also seems to be correlation on the charactersitcs of the home i.e a home with larger 1st floor area has higher total basement area, living area , garage area etc.
+
+Also, this shows that a house with higher overall quality generally has larger living size and generally fetches higher price.
+
+```{r}
+library(corrplot)
+corrplot(R, method="circle", type='lower')
+```
+
+
+#### Comparing impact of specific variables to Sales Price
+
+This comparison shows that Houses with Central air system sell at higher price than houses without central air.
+
+```{r}
+ggplot(house, aes(x = factor(CentralAir), y = SalePrice)) + geom_boxplot() + xlab("Central Air") + ylab("Sale Price") + ggtitle("Distribution of Sale Price based on Central Air system")
+```
+
+
+This chart shows that Sales price is uniform among building types, but there is a lot of variation in Single Family homes compared to other building types
+
+```{r}
+ggplot(house, aes(x = factor(BldgType), y = SalePrice)) + geom_violin(trim = T, draw_quantiles = c(0.25,0.5,0.75)) + xlab("Building Type") + ylab("Sale Price") + ggtitle("Distribution of Sale Price based on Building Type")
+```
+
+This chart shows that houses with wood shingle roof generally prefer high prices compared to Composite shingle roof or Tar Gravel roof
+
+```{r}
+ggplot(house, aes(x = factor(RoofMatl), y = SalePrice)) + geom_violin(trim = T, draw_quantiles = c(0.25,0.5,0.75)) + xlab("Roof Material") + ylab("Sale Price") + ggtitle("Distribution of Sale Price based on Roof Material")
+```
+
+Next charts show that houses with more full baths and garages fetch higher prices
+
+```{r}
+ggplot(house, aes(x = factor(GarageCars), y = SalePrice)) + geom_violin(trim = T, draw_quantiles = c(0.25,0.5,0.75)) + xlab("Garage Cars") + ylab("Sale Price") + ggtitle("Distribution of Sale Price based on Garage Cars")
+```
+
+```{r}
+ggplot(house, aes(x = factor(FullBath), y = SalePrice)) + geom_violin(trim = T, draw_quantiles = c(0.25,0.5,0.75)) + xlab("Full Bath") + ylab("Sale Price") + ggtitle("Distribution of Sale Price based on Full Bath")
+```
+
+This chart shows that houses with higher quality rating have are sold at higher prices
+
+```{r}
+ggplot(house, aes(x = factor(OverallQual), y = SalePrice)) + geom_violin(trim = T, draw_quantiles = c(0.25,0.5,0.75)) + xlab("Quality of house") + ylab("Sale Price") + ggtitle("Distribution of Sale Price based on Quality of house")
+```
+
+
+#### Point Distribution of paried variables.
+This distribution clearly shows that houses on RM Zone (Residential Medium Denisity) have lower lot area and generally have lower sales price
+
+```{r}
+ggplot(house, aes(y = SalePrice, x = log(LotArea))) + geom_point(aes(color= factor(MSZoning))) + xlab("Log(Lot Area)") + ylab("Sale Price") + ggtitle("Relationship between Lot Area, Sale Price and Zoning")
+```
+
+This distribution chart shows that generally Townhomes are on lower lot area and feth lower prices. However End unit townhouses fetch comparable prices to single family homes
+
+```{r}
+ggplot(house, aes(y = SalePrice, x = log(LotArea))) + geom_point(aes(color= factor(BldgType))) + xlab("Lot Area") + ylab("Sale Price") + ggtitle("Relationship between Lot Area, Sale Price and Building Type ")
+```
+
+This chart clearly shows that houses that are built in later years are geneally more expensive even if they might have the same area
+```{r}
+ggplot(house, aes(y = SalePrice, x = (X1stFlrSF+X2ndFlrSF))) + geom_point(aes(color= factor(YearBuilt))) + xlab("House Area") + ylab("Sale Price") + ggtitle("Relationship between House Area,  Sale Price and Year built")
+```
+
+This chart shows that foundation impacts the price of the house and the most expensive houses have pourded concrete foundation.
+
+```{r}
+ggplot(house, aes(y = SalePrice, x = (X1stFlrSF + X2ndFlrSF))) + geom_point(aes(color= factor(Foundation))) + xlab("House Area") + ylab("Sale Price") + ggtitle("Relationship between House Area, Sale Price and Foundation")
+```
+
+
+### Regression
+
+Results of the regression analysis shows that the following variables are good for predicting the Sale Price of the house. These variable have a p-value of <0.01
+- Overall Quality of house
+- Overall Condition of the house
+- Year that house was built
+- Heating
+- Zoning
+- Condition of House
+- Roof Material
+- Basement paramters
+- Kitchen parameters
+
+
+```{r cache = TRUE}
+house$logSalePrice = log(house$SalePrice)
+lm.house = lm(logSalePrice ~.-SalePrice,data = house)
+summary(lm.house)
+plot(lm.house)
+```
+
+
+#### Stepwise regression
+Stepwise regression shows that there is lot of correlation between the independent variable. The final model was a combination of following parameters
+  - Various area of the house( Lot Area, Garage Area etc )
+  - Number of rooms, garages, full baths, half baths.
+  - Roof parameters.
+  - Kitchen Quality
+and some other parameters
+  
+
+```{r cache = TRUE echo = FALSE}
+lm.house.aic = stepAIC(lm.house, direction = "both")
+```
+
+
+```{r cache = TRUE}
+lm.house.aic$anova
+```
+
+### SVD Regression
+```{r}
+house.svd = house
+house.svd$SalePrice = NULL
+cols = names(house.int)
+cols = cols[cols!="SalePrice"]
+cols = c(cols, "logSalePrice")
+house.scale = house.svd
+house.scale[,cols] = lapply(house.svd[,cols], function(x) { scale(x, center = TRUE, scale = TRUE)})
+house.modmat = model.matrix(logSalePrice~., data = house.scale)
+
+
+plot.svd.reg <- function(df, k){
+  require(ggplot2)
+  require(gridExtra)
+  
+  p1 <- ggplot(df) + 
+    geom_point(aes(score, resids), size = 2) + 
+    stat_smooth(aes(score, resids)) +
+    ggtitle('Residuals vs. fitted values')
+  
+  p2 <- ggplot(df, aes(resids)) +
+    geom_histogram(aes(y = ..density..)) +
+    geom_density(color = 'red', fill = 'red', alpha = 0.2) +
+    ggtitle('Histogram of residuals')
+  
+  qqnorm(df$resids)
+  
+  grid.arrange(p1, p2, ncol = 2)
+  
+  df$std.resids = sqrt((df$resids - mean(df$resids))^2)  
+  
+  p3 = ggplot(df) + 
+    geom_point(aes(score, std.resids), size = 2) + 
+    stat_smooth(aes(score, std.resids)) +
+    ggtitle('Standardized residuals vs. fitted values')
+  print(p3) 
+  
+  n = nrow(df)
+  Ybar = mean(df$logSalePrice)
+  SST <- sum((df$logSalePrice - Ybar)^2)
+  SSR <- sum(df$resids * df$resids)
+  SSE = SST - SSR
+  RMSE = sqrt(SSR/(n-2))
+  cat(paste('SSE =', as.character(SSE), '\n'))
+  cat(paste('SSR =', as.character(SSR), '\n'))
+  cat(paste('SST =', as.character(SSE + SSR), '\n'))
+  cat(paste('RMSE =', as.character(SSE/(n - 2)), '\n'))
+  
+  adjR2  <- 1.0 - (SSR/SST) * ((n - 1)/(n - k - 1))
+  cat(paste('Adjusted R^2 =', as.character(adjR2)), '\n')
+}
+
+
+
+M = house.modmat[,-1]
+M2 = t(M)%*%M
+head(M2)
+
+mSVD = svd(M2)
+plot(log(mSVD$d))
+
+inv.diag = rep(0, length(mSVD$d))
+inv.diag[1:190] = 1/mSVD$d[1:190]
+mD = diag(inv.diag)
+
+#Inverse (t(M)*M) = V Diag U
+mInV = mSVD$v %*% mD %*% t(mSVD$u)
+b = house.scale$logSalePrice
+#x = Inv(MTM)*t(M)*b
+x = mInV %*% t(M) %*% b
+
+x = ginv(M) %*% b
+house.cp = house
+house.cp$score =  (M %*% x)*sd(house.cp$logSalePrice) + mean(house.cp$logSalePrice)
+house.cp$resids =  house.cp$score - house.cp$logSalePrice
+
+RSS = sum((house.cp$logSalePrice - (house.cp$score))^2)
+RSS
+TSS = sum((house.cp$logSalePrice - mean(house.cp$logSalePrice))^2)
+TSS
+require(repr)
+options(repr.pmales.extlot.width=8, repr.plot.height=4)
+plot
+```
+
+
+### Elastic Net Regression
+```{r pressure, echo=FALSE}
+plot(pressure)
+```
+

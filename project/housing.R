@@ -52,7 +52,7 @@ hist(house$BsmtFinSF1)
 hist(house$BsmtFinSF2)
 hist(house$BsmtUnfSF)
 hist(house$TotalBsmtSF)
-hist(house$X1stFlrSF)
+hist(house$X1stFlrSF + house$X2ndFlrSF)
 hist(house$X2ndFlrSF)
 hist(house$LowQualFinSF)
 hist(house$GrLivArea)
@@ -77,6 +77,16 @@ hist(house$MoSold)
 hist(house$YrSold)
 hist(house$SalePrice)
 hist(house$LotArea)
+
+
+ggplot(house, aes(SalePrice)) + geom_histogram(binwidth = 10000) + xlab("SalePrice") + ylab("Counts") + ggtitle(" Histogram of Sale Prices")
+ggplot(house, aes(OverallQual)) + geom_histogram() + xlab("Quality Ratings") + ylab("Counts") + ggtitle(" Histogram of Quality Rating of Houses")
+ggplot(house, aes(X1stFlrSF+X2ndFlrSF)) + geom_histogram(binwidth = 100) + xlab("Total Housing Area Square Feet") + ylab("Counts") + ggtitle("Histogram of House Area")
+ggplot(house, aes(GarageCars)) + geom_histogram() + xlab("Garage Capacity") + ylab("Counts") + ggtitle("Histogram of Garage Capacity")
+ggplot(house, aes(FullBath)) + geom_histogram() + xlab("# of Full Bath") + ylab("Counts") + ggtitle("Histogram of Full Baths")
+
+
+
 #Exploratory Data Analyis
 
 #Removed ones:
