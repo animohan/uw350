@@ -42,7 +42,7 @@ Since some variables are only available for small number of houses, for the purp
 
 ```{r}
 todrop = c("Fence", "MiscFeature","PoolQC","GarageType","GarageQual","GarageCond", "GarageFinish","GarageYrBlt",
-           "FireplaceQu", "BsmtFinType1", "BsmtFinType2", "BsmtExposure","BsmtQual","BsmtCond","Alley","LotFrontage")
+           "FireplaceQu", "BsmtFinType1", "BsmtFinType2", "BsmtExposure","BsmtQual","BsmtCond","Alley","LotFrontage","Condition2")
 house[,todrop] = NULL
 house = na.omit(house)
 
@@ -235,35 +235,65 @@ ggplot(house, aes(y = SalePrice, x = (X1stFlrSF + X2ndFlrSF))) + geom_point(aes(
 ### Regression
 
 Results of the regression analysis shows that the following variables are good for predicting the Sale Price of the house. These variable have a p-value of <0.01
-- Overall Quality of house
-- Overall Condition of the house
-- Year that house was built
-- Heating
-- Zoning
-- Condition of House
-- Roof Material
-- Basement paramters
-- Kitchen parameters
 
+    1.  Overall Quality of house
+    2.  Overall Condition of the house
+    3.  Year that house was built
+    4.  Heating
+    5.  Zoning
+    6.  Condition of House
+    7.  Roof Material
+    8.  Basement paramters
+    9.  Kitchen parameters
+
+The final results has following parameters:
+
+    1.  RMSE of about 0.1099
+    2.  $R^2$ = 0.93
+    3.  Adj $R^2$ = 0.92
 
 ```{r cache = TRUE}
+#Linear Regression of the model.
 house$logSalePrice = log(house$SalePrice)
 lm.house = lm(logSalePrice ~.-SalePrice,data = house)
+```
+
+```{r}
 summary(lm.house)
-plot(lm.house)
 ```
 
 
-#### Stepwise regression
-Stepwise regression shows that there is lot of correlation between the independent variable. The final model was a combination of following parameters
-  - Various area of the house( Lot Area, Garage Area etc )
-  - Number of rooms, garages, full baths, half baths.
-  - Roof parameters.
-  - Kitchen Quality
-and some other parameters
+Plotting of various residual values show that
+  * Residuals are mean distributed at 0. 
+  * There are some values that have high leverage and some that are outliers.
   
 
-```{r cache = TRUE echo = FALSE}
+```{r, message=FALSE, warning=FALSE}
+plot(lm.house)
+```
+
+#### Stepwise regression
+Stepwise regression shows that there is lot of correlation between the independent variable. The final model was a combination of following parameters
+
+    1.  Land/Lot Parameters (Contour, Utilities, Slope, Zoning etc. )
+    2.  Areas of various parts of the house( Lot Area, Garage Area etc )
+    3.  Roof Material
+    4.  Characterstics, Quality and Condition of the house.
+    5.  Number of rooms, garages, full baths, half baths.
+    6.  Heating and Central Air.
+    7.  Basement size parameters
+
+Some of the parameters that were removed from the model were:
+
+    1. Class of the land
+    2. Shape of the lot
+    3. House Style
+    4. Roof Styles
+    5. Anything to do with Masonary.
+    6. Basement Conditions
+  
+  
+```{r cache = TRUE, message=FALSE, warning=FALSE, include=FALSE}
 lm.house.aic = stepAIC(lm.house, direction = "both")
 ```
 
@@ -272,8 +302,19 @@ lm.house.aic = stepAIC(lm.house, direction = "both")
 lm.house.aic$anova
 ```
 
+
+
 ### SVD Regression
-```{r}
+For the SVD Regression, the pseudo inverse of the matrix was calculated. 
+The final results has following parameters:
+
+    1.  RMSE of about 0.01
+    2.  $R^2$ = 0.93
+    3.  Adj $R^2$ = 0.92
+
+
+```{r cache = TRUE}
+#Setting up house matrices, including scaling
 house.svd = house
 house.svd$SalePrice = NULL
 cols = names(house.int)
@@ -282,60 +323,21 @@ cols = c(cols, "logSalePrice")
 house.scale = house.svd
 house.scale[,cols] = lapply(house.svd[,cols], function(x) { scale(x, center = TRUE, scale = TRUE)})
 house.modmat = model.matrix(logSalePrice~., data = house.scale)
-
-
-plot.svd.reg <- function(df, k){
-  require(ggplot2)
-  require(gridExtra)
-  
-  p1 <- ggplot(df) + 
-    geom_point(aes(score, resids), size = 2) + 
-    stat_smooth(aes(score, resids)) +
-    ggtitle('Residuals vs. fitted values')
-  
-  p2 <- ggplot(df, aes(resids)) +
-    geom_histogram(aes(y = ..density..)) +
-    geom_density(color = 'red', fill = 'red', alpha = 0.2) +
-    ggtitle('Histogram of residuals')
-  
-  qqnorm(df$resids)
-  
-  grid.arrange(p1, p2, ncol = 2)
-  
-  df$std.resids = sqrt((df$resids - mean(df$resids))^2)  
-  
-  p3 = ggplot(df) + 
-    geom_point(aes(score, std.resids), size = 2) + 
-    stat_smooth(aes(score, std.resids)) +
-    ggtitle('Standardized residuals vs. fitted values')
-  print(p3) 
-  
-  n = nrow(df)
-  Ybar = mean(df$logSalePrice)
-  SST <- sum((df$logSalePrice - Ybar)^2)
-  SSR <- sum(df$resids * df$resids)
-  SSE = SST - SSR
-  RMSE = sqrt(SSR/(n-2))
-  cat(paste('SSE =', as.character(SSE), '\n'))
-  cat(paste('SSR =', as.character(SSR), '\n'))
-  cat(paste('SST =', as.character(SSE + SSR), '\n'))
-  cat(paste('RMSE =', as.character(SSE/(n - 2)), '\n'))
-  
-  adjR2  <- 1.0 - (SSR/SST) * ((n - 1)/(n - k - 1))
-  cat(paste('Adjusted R^2 =', as.character(adjR2)), '\n')
-}
+```
 
 
 
+```{r}
+#Running SVD
 M = house.modmat[,-1]
 M2 = t(M)%*%M
-head(M2)
+# head(M2)
 
 mSVD = svd(M2)
 plot(log(mSVD$d))
 
 inv.diag = rep(0, length(mSVD$d))
-inv.diag[1:190] = 1/mSVD$d[1:190]
+inv.diag[1:20] = 1/mSVD$d[1:20]
 mD = diag(inv.diag)
 
 #Inverse (t(M)*M) = V Diag U
@@ -344,20 +346,62 @@ b = house.scale$logSalePrice
 #x = Inv(MTM)*t(M)*b
 x = mInV %*% t(M) %*% b
 
-x = ginv(M) %*% b
+#x = ginv(M) %*% b
 house.cp = house
 house.cp$score =  (M %*% x)*sd(house.cp$logSalePrice) + mean(house.cp$logSalePrice)
 house.cp$resids =  house.cp$score - house.cp$logSalePrice
+```
 
+The final results has following parameters:
+
+    1.  RMSE of about 0.01
+    2.  $R^2$ = 0.93
+    3.  Adj $R^2$ = 0.92
+    
+```{r}
+#Calculating Errors
 RSS = sum((house.cp$logSalePrice - (house.cp$score))^2)
 RSS
 TSS = sum((house.cp$logSalePrice - mean(house.cp$logSalePrice))^2)
 TSS
-require(repr)
-options(repr.pmales.extlot.width=8, repr.plot.height=4)
-plot
+RMSE = mean((house.cp$logSalePrice - (house.cp$score))^2)
+RMSE
+n = nrow(house.modmat)
+k = ncol(house.modmat)-1
+R2 = 1.0 - (RSS/TSS)
+R2
+adjR2  <- 1.0 - (RSS/TSS) * ((n - 1)/(n - k - 1))
+cat(paste('Adjusted R^2 =', as.character(adjR2)), '\n')
 ```
 
+
+
+```{r}
+#Plotting residuals
+
+  p1 <- ggplot(house.cp) + 
+    geom_point(aes(score, resids), size = 2) + 
+    stat_smooth(aes(score, resids)) +
+    ggtitle('Residuals vs. fitted values')
+  
+  p2 <- ggplot(house.cp, aes(resids)) +
+    geom_histogram(aes(y = ..density..)) +
+    geom_density(color = 'red', fill = 'red', alpha = 0.2) +
+    ggtitle('Histogram of residuals')
+  
+  qqnorm(house.cp$resids)
+  
+  grid.arrange(p1, p2, ncol = 2)
+  
+  house.cp$std.resids = sqrt((house.cp$resids - mean(house.cp$resids))^2)  
+  
+  p3 = ggplot(house.cp) + 
+    geom_point(aes(score, std.resids), size = 2) + 
+    stat_smooth(aes(score, std.resids)) +
+    ggtitle('Standardized residuals vs. fitted values')
+  print(p3)   
+
+```
 
 ### Elastic Net Regression
 ```{r pressure, echo=FALSE}
